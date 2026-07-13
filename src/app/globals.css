@@ -1,0 +1,144 @@
+@import "tailwindcss";
+
+@theme {
+  --color-ieee-blue: #00629B;
+  --color-ieee-dark: #0A192F;
+  --color-ieee-deep: #020C1B;
+  --color-ieee-light: #0087D7;
+  --color-ieee-accent: #00B4FF;
+  --color-ieee-sky: #E6F0FA;
+  --color-glass-white: rgba(255, 255, 255, 0.05);
+  --color-glass-border: rgba(255, 255, 255, 0.08);
+  --color-glass-blue: rgba(0, 98, 155, 0.08);
+}
+
+:root {
+  --background: #020c1b;
+  --foreground: #f8fafc;
+  --primary: #00629B;
+}
+
+html {
+  scroll-behavior: smooth;
+  background-color: var(--background);
+  color: var(--foreground);
+}
+
+body {
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  background: radial-gradient(circle at 50% 0%, #081e3d 0%, #020c1b 100%);
+  color: var(--foreground);
+  overflow-x: hidden;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #020c1b;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #00629B;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #0087D7;
+}
+
+/* Glassmorphism utility classes */
+.glass-panel {
+  background: rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 1rem;
+}
+
+.glass-panel-hover {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.glass-panel-hover:hover {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(0, 180, 255, 0.3);
+  box-shadow: 0 10px 30px -10px rgba(0, 98, 155, 0.3);
+  transform: translateY(-4px);
+}
+
+.glass-navbar {
+  background: rgba(2, 12, 27, 0.75);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.glass-card-blue {
+  background: rgba(0, 98, 155, 0.1);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(0, 180, 255, 0.15);
+}
+
+/* Gradients */
+.text-gradient-primary {
+  background: linear-gradient(135deg, #ffffff 30%, #00B4FF 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.text-gradient-accent {
+  background: linear-gradient(135deg, #00B4FF 0%, #00629B 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.bg-gradient-blue {
+  background: linear-gradient(135deg, #00629B 0%, #0087D7 50%, #00B4FF 100%);
+}
+
+.bg-gradient-dark {
+  background: linear-gradient(180deg, #0a192f 0%, #020c1b 100%);
+}
+
+/* Animations */
+@keyframes float {
+  0% { transform: translateY(0px) rotate(0deg); }
+  50% { transform: translateY(-15px) rotate(3deg); }
+  100% { transform: translateY(0px) rotate(0deg); }
+}
+
+@keyframes float-slow {
+  0% { transform: translateY(0px) rotate(0deg) scale(1); }
+  50% { transform: translateY(-20px) rotate(-5deg) scale(1.05); }
+  100% { transform: translateY(0px) rotate(0deg) scale(1); }
+}
+
+@keyframes pulse-glow {
+  0%, 100% { opacity: 0.5; box-shadow: 0 0 15px rgba(0, 180, 255, 0.2); }
+  50% { opacity: 0.8; box-shadow: 0 0 25px rgba(0, 180, 255, 0.4); }
+}
+
+.animate-float {
+  animation: float 6s ease-in-out infinite;
+}
+
+.animate-float-slow {
+  animation: float-slow 10s ease-in-out infinite;
+}
+
+.animate-pulse-glow {
+  animation: pulse-glow 3s infinite;
+}
+
+/* Timeline specific styles */
+.timeline-dot {
+  box-shadow: 0 0 0 4px rgba(0, 98, 155, 0.2);
+}
+
+.timeline-line {
+  background: linear-gradient(to bottom, rgba(0, 98, 155, 0.1), #00629B, rgba(0, 180, 255, 0.1));
+}
