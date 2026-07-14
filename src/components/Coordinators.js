@@ -1,6 +1,7 @@
 "use client";
 
-import { FaWhatsapp, FaUserCircle, FaUserAlt } from "react-icons/fa";
+import { useState } from "react";
+import { FaWhatsapp, FaUserCircle, FaUserAlt, FaTimes, FaCommentAlt } from "react-icons/fa";
 
 const STUDENTS = [
   { name: "S Sai Prakyath", phone: "9391171573" },
@@ -14,7 +15,46 @@ const FACULTY = [
   { name: "Ms. P. J. Kiruthiga", title: "Faculty Coordinator" },
 ];
 
+const PRE_TYPED_MESSAGES = [
+  {
+    id: "general",
+    label: "General Enquiry",
+    text: "Hi, I am interested in joining KARE IEEE Education Society. Can you please tell me more about the recruitment process and when the selections will start?"
+  },
+  {
+    id: "schedule",
+    label: "Interview Status",
+    text: "Hi, I have filled out the application form for the IEEE recruitment. I would like to enquire about the status of my application and the interview schedule."
+  },
+  {
+    id: "roles",
+    label: "Domains & Roles",
+    text: "Hi, I am interested in the IEEE recruitment and wanted to ask about the specific roles and tasks for the different domains (like Web Dev, AI/ML, Content, etc.)."
+  }
+];
+
 export default function Coordinators() {
+  const [selectedCoordinator, setSelectedCoordinator] = useState(null);
+  const [activeMessageIndex, setActiveMessageIndex] = useState(0);
+  const [customText, setCustomText] = useState("");
+
+  const handleOpenMsgModal = (coordinator) => {
+    setSelectedCoordinator(coordinator);
+    setActiveMessageIndex(0);
+    setCustomText(PRE_TYPED_MESSAGES[0].text);
+  };
+
+  const handleCloseMsgModal = () => {
+    setSelectedCoordinator(null);
+  };
+
+  const handleSendWhatsApp = () => {
+    if (!selectedCoordinator) return;
+    const encoded = encodeURIComponent(customText);
+    window.open(`https://wa.me/91${selectedCoordinator.phone}?text=${encoded}`, "_blank");
+    setSelectedCoordinator(null);
+  };
+
   return (
     <section id="contact" className="py-24 relative overflow-hidden bg-ieee-deep/50">
       
@@ -89,21 +129,107 @@ export default function Coordinators() {
                 </div>
                 
                 {/* Whatsapp Trigger Button */}
-                <a
-                  href={`https://wa.me/91${stud.phone}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="w-full py-3 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-sm flex items-center justify-center space-x-2 transition-all duration-300 hover:shadow-[0_0_15px_rgba(16,185,129,0.3)] hover:-translate-y-0.5 border border-emerald-500/20"
+                <button
+                  onClick={() => handleOpenMsgModal(stud)}
+                  className="w-full py-3 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-sm flex items-center justify-center space-x-2 transition-all duration-300 hover:shadow-[0_0_15px_rgba(16,185,129,0.3)] hover:-translate-y-0.5 border border-emerald-500/20 cursor-pointer"
                 >
                   <FaWhatsapp size={18} />
                   <span>Connect on WhatsApp</span>
-                </a>
+                </button>
               </div>
             ))}
           </div>
         </div>
 
       </div>
+
+      {/* Whatsapp Inquiry Pre-typed Message Modal */}
+      {selectedCoordinator && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-sm p-4">
+          <div className="glass-panel w-full max-w-md border-white/8 bg-[#020c1b] shadow-2xl p-6 sm:p-8 relative">
+            
+            {/* Close button */}
+            <button
+              onClick={handleCloseMsgModal}
+              className="absolute top-4 right-4 text-slate-400 hover:text-white p-1 rounded-lg hover:bg-white/5 transition-colors cursor-pointer"
+            >
+              <FaTimes size={16} />
+            </button>
+
+            {/* Header */}
+            <div className="flex items-center space-x-3 mb-6 border-b border-white/5 pb-4">
+              <div className="w-10 h-10 rounded-full bg-emerald-600/10 text-emerald-400 flex items-center justify-center border border-emerald-500/20">
+                <FaCommentAlt size={16} />
+              </div>
+              <div>
+                <h3 className="text-white font-extrabold text-lg leading-tight">
+                  Enquire via WhatsApp
+                </h3>
+                <p className="text-slate-400 text-xs mt-0.5">
+                  Contacting <span className="text-emerald-400 font-semibold">{selectedCoordinator.name}</span>
+                </p>
+              </div>
+            </div>
+
+            {/* Template Selectors */}
+            <div className="space-y-2 mb-5">
+              <label className="text-slate-400 text-[10px] font-bold tracking-widest uppercase block mb-1">
+                Select Inquiry Topic
+              </label>
+              <div className="grid grid-cols-3 gap-2">
+                {PRE_TYPED_MESSAGES.map((msg, idx) => (
+                  <button
+                    key={msg.id}
+                    onClick={() => {
+                      setActiveMessageIndex(idx);
+                      setCustomText(msg.text);
+                    }}
+                    className={`py-2 px-1 rounded-lg border text-center transition-all cursor-pointer text-[10px] font-bold tracking-wide ${
+                      activeMessageIndex === idx
+                        ? "bg-emerald-600/20 border-emerald-500 text-emerald-400"
+                        : "bg-white/3 border-white/8 text-slate-300 hover:bg-white/5 hover:border-white/20"
+                    }`}
+                  >
+                    {msg.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Editable Message Area */}
+            <div className="space-y-2 mb-6">
+              <label className="text-slate-400 text-[10px] font-bold tracking-widest uppercase block">
+                Message Preview
+              </label>
+              <textarea
+                value={customText}
+                onChange={(e) => setCustomText(e.target.value)}
+                rows={5}
+                className="w-full p-4 rounded-xl bg-white/3 border border-white/8 text-white text-xs leading-relaxed focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500/25 resize-none transition-all"
+              />
+            </div>
+
+            {/* Action Buttons */}
+            <div className="flex gap-4">
+              <button
+                onClick={handleCloseMsgModal}
+                className="flex-grow py-3 rounded-xl border border-white/8 text-slate-400 hover:text-white text-xs font-bold transition-all cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleSendWhatsApp}
+                className="flex-grow py-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold flex items-center justify-center space-x-2 transition-all cursor-pointer hover:shadow-[0_0_15px_rgba(16,185,129,0.3)] border border-emerald-500/20"
+              >
+                <FaWhatsapp size={14} />
+                <span>Send via WhatsApp</span>
+              </button>
+            </div>
+
+          </div>
+        </div>
+      )}
+
     </section>
   );
 }
