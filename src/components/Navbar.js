@@ -6,11 +6,11 @@ import Link from "next/link";
 import { FiMenu, FiX } from "react-icons/fi";
 
 const NAV_LINKS = [
-  { label: "Home", href: "#home" },
-  { label: "About", href: "#about" },
-  { label: "Recruitment Process", href: "#process" },
-  { label: "Roles", href: "#roles" },
-  { label: "Contact", href: "#contact" },
+  { label: "Home", href: "/#home" },
+  { label: "About", href: "//#about" },
+  { label: "Recruitment Process", href: "/#process" },
+  { label: "Roles", href: "/#roles" },
+  { label: "Check Status", href: "/status" },
 ];
 
 export default function Navbar() {
@@ -30,16 +30,30 @@ export default function Navbar() {
   }, []);
 
   const handleScrollTo = (e, href) => {
-    e.preventDefault();
-    setIsOpen(false);
-    const targetElement = document.querySelector(href);
-    if (targetElement) {
-      const navbarHeight = 80;
-      const elementPosition = targetElement.getBoundingClientRect().top + window.scrollY;
-      window.scrollTo({
-        top: elementPosition - navbarHeight,
-        behavior: "smooth",
-      });
+    const isHash = href.includes("#");
+    const hash = isHash ? href.substring(href.indexOf("#")) : "";
+    const isStatus = href === "/status";
+
+    if (isStatus) {
+      setIsOpen(false);
+      return;
+    }
+
+    if (isHash) {
+      const isHomepage = window.location.pathname === "/" || window.location.pathname === "";
+      if (isHomepage) {
+        e.preventDefault();
+        setIsOpen(false);
+        const targetElement = document.querySelector(hash);
+        if (targetElement) {
+          const navbarHeight = 80;
+          const elementPosition = targetElement.getBoundingClientRect().top + window.scrollY;
+          window.scrollTo({
+            top: elementPosition - navbarHeight,
+            behavior: "smooth",
+          });
+        }
+      }
     }
   };
 
@@ -54,7 +68,7 @@ export default function Navbar() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           {/* Logo & Title */}
-          <Link href="#home" className="flex items-center space-x-3 group" onClick={(e) => handleScrollTo(e, "#home")}>
+          <Link href="/#home" className="flex items-center space-x-3 group" onClick={(e) => handleScrollTo(e, "/#home")}>
             <div className="relative w-14 h-10 overflow-hidden rounded-lg bg-white p-0.5 border border-ieee-blue/30 group-hover:border-ieee-accent transition-colors duration-300 flex items-center justify-center">
               <Image
                 src="/logo.jpg"
@@ -77,7 +91,7 @@ export default function Navbar() {
           {/* Desktop Nav */}
           <div className="hidden md:flex items-center space-x-8">
             {NAV_LINKS.map((link) => (
-              <a
+              <Link
                 key={link.label}
                 href={link.href}
                 onClick={(e) => handleScrollTo(e, link.href)}
@@ -85,15 +99,15 @@ export default function Navbar() {
               >
                 {link.label}
                 <span className="absolute bottom-[-4px] left-0 w-0 h-[2px] bg-ieee-accent transition-all duration-300 group-hover:w-full"></span>
-              </a>
+              </Link>
             ))}
-            <a
-              href="#apply"
-              onClick={(e) => handleScrollTo(e, "#apply")}
+            <Link
+              href="/#apply"
+              onClick={(e) => handleScrollTo(e, "/#apply")}
               className="bg-ieee-blue hover:bg-ieee-light text-white px-6 py-2.5 rounded-full text-sm font-semibold transition-all duration-300 hover:shadow-[0_0_15px_rgba(0,180,255,0.4)] hover:-translate-y-0.5 border border-ieee-accent/25"
             >
               Apply Now
-            </a>
+            </Link>
           </div>
 
           {/* Mobile menu button */}
@@ -117,22 +131,22 @@ export default function Navbar() {
       >
         <div className="px-4 pt-8 pb-6 space-y-6 flex flex-col items-center">
           {NAV_LINKS.map((link) => (
-            <a
+            <Link
               key={link.label}
               href={link.href}
               onClick={(e) => handleScrollTo(e, link.href)}
               className="text-slate-300 hover:text-white font-medium text-lg tracking-wide transition-colors"
             >
               {link.label}
-            </a>
+            </Link>
           ))}
-          <a
-            href="#apply"
-            onClick={(e) => handleScrollTo(e, "#apply")}
+          <Link
+            href="/#apply"
+            onClick={(e) => handleScrollTo(e, "/#apply")}
             className="w-full max-w-xs text-center bg-ieee-blue hover:bg-ieee-light text-white px-6 py-3 rounded-full text-base font-semibold transition-all duration-200 border border-ieee-accent/25"
           >
             Apply Now
-          </a>
+          </Link>
         </div>
       </div>
     </nav>

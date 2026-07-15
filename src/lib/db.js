@@ -109,7 +109,6 @@ export async function getApplicants() {
         priority3: data.priority3 || "",
         status: data.status || "pending",
         approvedRole: data.approvedRole || "",
-        dueDate: data.dueDate || "",
         timestamp: data.timestamp ? (data.timestamp.toDate ? data.timestamp.toDate().getTime() : new Date(data.timestamp).getTime()) : null,
       };
     });
@@ -137,20 +136,18 @@ export async function updateApplicantStatus(id, newStatus) {
 }
 
 /**
- * Approves an applicant with a specific role and due date, then sends the appointment email (Server Action).
+ * Approves an applicant with a specific role, then sends the appointment email (Server Action).
  * @param {string} id 
  * @param {string} role 
- * @param {string} dueDate 
  * @returns {Promise<object>}
  */
-export async function approveApplicantWithRole(id, role, dueDate) {
+export async function approveApplicantWithRole(id, role) {
   if (!adminDb) throw new Error("Database not initialized");
   try {
     const docRef = adminDb.collection("Applicants").doc(id);
     await docRef.update({
       status: "approved",
-      approvedRole: role,
-      dueDate: dueDate
+      approvedRole: role
     });
 
     const doc = await docRef.get();
@@ -163,8 +160,7 @@ export async function approveApplicantWithRole(id, role, dueDate) {
         htmlContent: await getSelectionEmailHtml({
           id: id,
           name: appData.name,
-          role: role,
-          dueDate: dueDate
+          role: role
         })
       });
     }
@@ -216,5 +212,45 @@ export async function deleteAllApplicants() {
   } catch (error) {
     console.error("Error deleting all applicants:", error);
     throw error;
+  }
+}
+
+/**
+ * Retrieves an applicant by registration number for the public selection checker.
+ * Converts timestamp to a serializable ISO string.
+ * @param {string} regNo
+ * @returns {Promise<object|null>}
+ */
+export async function getApplicantByRegNumber(regNo) {
+  if (!regNo || !adminDb) return null;
+  try {
+    const querySnapshot = await adminDb.collection("Applicants")
+      .where("registrationNumber", "==", regNo.trim().toUpperCase())
+      .limit(1)
+      .get();
+    
+    if (querySnapshot.empty) return null;
+    
+    const doc = querySnapshot.docs[0];
+    const data = doc.data();
+    
+    const serializableData = {
+      id: doc.id,
+      name: data.name,
+      registrationNumber: data.registrationNumber,
+      year: data.year,
+      department: data.department,
+      section: data.section,
+      email: data.email,
+      phone: data.phone,
+      priority1: data.priority1,
+      status: data.status,
+      approvedRole: data.approvedRole || null,
+      timestamp: data.timestamp ? (data.timestamp.toDate ? data.timestamp.toDate().toISOString() : new Date(data.timestamp).toISOString()) : null
+    };
+    return serializableData;
+  } catch (error) {
+    console.error("Error getting applicant by reg number:", error);
+    return null;
   }
 }

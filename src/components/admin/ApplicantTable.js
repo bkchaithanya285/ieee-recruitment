@@ -62,7 +62,6 @@ export default function ApplicantTable({ applicants, onFilteredChange, refreshDa
   // Approval flow states
   const [approvalModalData, setApprovalModalData] = useState(null);
   const [approvedRole, setApprovedRole] = useState("");
-  const [approvalDueDate, setApprovalDueDate] = useState("");
   const [previewTab, setPreviewTab] = useState("email"); // 'email' or 'whatsapp'
 
   // Apply filters, searches, and sorts
@@ -136,10 +135,6 @@ export default function ApplicantTable({ applicants, onFilteredChange, refreshDa
           priority3: app.priority3
         });
         setApprovedRole(app.priority1 || ROLE_OPTIONS[0]);
-        // Set default due date to 3 days from now
-        const d = new Date();
-        d.setDate(d.getDate() + 3);
-        setApprovalDueDate(d.toISOString().split("T")[0]);
       }
       return;
     }
@@ -169,13 +164,7 @@ export default function ApplicantTable({ applicants, onFilteredChange, refreshDa
     if (!approvalModalData) return;
     setActionLoading(true);
     try {
-      const readableDate = new Date(approvalDueDate).toLocaleDateString("en-IN", {
-        day: "2-digit",
-        month: "long",
-        year: "numeric"
-      });
-
-      await approveApplicantWithRole(approvalModalData.id, approvedRole, readableDate);
+      await approveApplicantWithRole(approvalModalData.id, approvedRole);
       addToast(`Applicant approved as ${approvedRole}! Appointment Order sent.`, "success");
       
       if (refreshData) {
@@ -187,8 +176,7 @@ export default function ApplicantTable({ applicants, onFilteredChange, refreshDa
         setSelectedApplicant(prev => ({ 
           ...prev, 
           status: "approved",
-          approvedRole: approvedRole,
-          dueDate: readableDate
+          approvedRole: approvedRole
         }));
       }
 
@@ -196,8 +184,6 @@ export default function ApplicantTable({ applicants, onFilteredChange, refreshDa
         const rawMessage = `Hello ${approvalModalData.name} 👋,
 
 Congratulations! You have been selected for the role of *${approvedRole}* in the *KARE IEEE Education Society*.
-
-Please complete your confirmation/onboarding by *${readableDate}*.
 
 We look forward to working with you!`;
         const encodedMessage = encodeURIComponent(rawMessage);
@@ -354,58 +340,55 @@ KARE IEEE EDUCATION SOCIETY`;
       doc.setFontSize(11);
       doc.setTextColor(51, 65, 85);
       const body1 = "Based on your performance in the recruitment interviews and evaluations held by the Executive Board, we are pleased to inform you that you have been selected to join the core team of KARE IEEE Education Society for the academic year 2026-2027.";
-      const body2 = "You are hereby appointed to the following position with immediate effect, subject to your formal confirmation:";
+      const body2 = "You are hereby appointed to the following position with immediate effect:";
 
       let currentY = 101;
       const splitBody1 = doc.splitTextToSize(body1, pageWidth - 30);
-      doc.text(splitBody1, 15, currentY, { align: "justify" });
+      doc.text(splitBody1, 15, currentY);
       currentY += (splitBody1.length * 6) + 4;
       
       const splitBody2 = doc.splitTextToSize(body2, pageWidth - 30);
-      doc.text(splitBody2, 15, currentY, { align: "justify" });
+      doc.text(splitBody2, 15, currentY);
       currentY += (splitBody2.length * 6) + 6;
 
       // Key details box
       const boxStartY = currentY;
       doc.setFillColor(248, 250, 252);
-      doc.rect(15, boxStartY, pageWidth - 30, 42, "F");
+      doc.rect(15, boxStartY, pageWidth - 30, 33, "F");
       doc.setDrawColor(203, 213, 225);
       doc.setLineWidth(0.3);
-      doc.rect(15, boxStartY, pageWidth - 30, 42);
+      doc.rect(15, boxStartY, pageWidth - 30, 33);
 
       doc.setFont("times", "bold");
       doc.setTextColor(100, 116, 139);
-      doc.text("Appointee Name:", 20, boxStartY + 10);
-      doc.text("Assigned Role/Domain:", 20, boxStartY + 19);
-      doc.text("Organization:", 20, boxStartY + 28);
-      doc.text("Confirmation Due Date:", 20, boxStartY + 37);
+      doc.text("Appointee Name:", 20, boxStartY + 9);
+      doc.text("Assigned Role/Domain:", 20, boxStartY + 17);
+      doc.text("Organization:", 20, boxStartY + 25);
 
       doc.setTextColor(15, 23, 42);
-      doc.text(app.name, pageWidth - 20, boxStartY + 10, { align: "right" });
+      doc.text(app.name, pageWidth - 20, boxStartY + 9, { align: "right" });
       doc.setTextColor(0, 98, 155);
-      doc.text(app.approvedRole || app.priority1 || "Core Member", pageWidth - 20, boxStartY + 19, { align: "right" });
+      doc.text(app.approvedRole || app.priority1 || "Core Member", pageWidth - 20, boxStartY + 17, { align: "right" });
       doc.setTextColor(15, 23, 42);
-      doc.text("KARE IEEE Education Society", pageWidth - 20, boxStartY + 28, { align: "right" });
-      doc.setTextColor(220, 38, 38); // Red
-      doc.text(app.dueDate || "As per schedule", pageWidth - 20, boxStartY + 37, { align: "right" });
+      doc.text("KARE IEEE Education Society", pageWidth - 20, boxStartY + 25, { align: "right" });
 
-      currentY = boxStartY + 42 + 8;
+      currentY = boxStartY + 33 + 8;
 
       // Core team expectations
       doc.setFont("times", "normal");
       doc.setTextColor(51, 65, 85);
       const body3 = "As a core committee member, you will be expected to work collaboratively with your team members, demonstrate leadership quality, and actively contribute to the workshops, technical events, and initiatives organized by the chapter.";
-      const body4 = "Please note that onboarding details and task assignments will be coordinated through our WhatsApp group. Ensure that you have accepted this appointment and confirmed your onboarding details by the due date mentioned above.";
+      const body4 = "Please note that onboarding details and task assignments will be coordinated through our WhatsApp group.";
       const body5 = "Congratulations once again! We look forward to an outstanding tenure working together to drive academic and technical excellence.";
 
       const splitBody3 = doc.splitTextToSize(body3, pageWidth - 30);
-      doc.text(splitBody3, 15, currentY, { align: "justify" });
+      doc.text(splitBody3, 15, currentY);
       currentY += (splitBody3.length * 6) + 4;
       const splitBody4 = doc.splitTextToSize(body4, pageWidth - 30);
-      doc.text(splitBody4, 15, currentY, { align: "justify" });
+      doc.text(splitBody4, 15, currentY);
       currentY += (splitBody4.length * 6) + 4;
       const splitBody5 = doc.splitTextToSize(body5, pageWidth - 30);
-      doc.text(splitBody5, 15, currentY, { align: "justify" });
+      doc.text(splitBody5, 15, currentY);
       currentY += (splitBody5.length * 6) + 8;
 
       // Regards text
@@ -994,22 +977,6 @@ KARE IEEE EDUCATION SOCIETY`;
                   </div>
                 </div>
 
-                {/* Select Onboarding Due Date */}
-                <div className="flex flex-col">
-                  <label className="text-slate-300 font-semibold text-xs tracking-wider uppercase mb-2">
-                    Confirmation/Onboarding Due Date
-                  </label>
-                  <input
-                    type="date"
-                    value={approvalDueDate}
-                    onChange={(e) => setApprovalDueDate(e.target.value)}
-                    className="w-full bg-[#020C1B] border border-white/8 rounded-xl px-4 py-3 text-sm font-semibold text-white focus:outline-none focus:border-ieee-accent transition-all cursor-pointer"
-                  />
-                  <p className="text-slate-500 text-[10.5px] mt-1.5 leading-normal">
-                    This is the deadline given to the applicant in their Appointment Order to confirm their selection.
-                  </p>
-                </div>
-
               </div>
 
               {/* Right Column: Previews Tab Panel (7/12 cols) */}
@@ -1092,20 +1059,10 @@ KARE IEEE EDUCATION SOCIETY`;
                               <span className="text-slate-500 font-semibold">Assigned Role:</span>
                               <strong className="text-slate-900">{approvedRole}</strong>
                             </div>
-                            <div className="flex justify-between">
-                              <span className="text-slate-500 font-semibold">Due Date:</span>
-                              <strong className="text-rose-600">
-                                {approvalDueDate ? new Date(approvalDueDate).toLocaleDateString("en-IN", {
-                                  day: "2-digit",
-                                  month: "long",
-                                  year: "numeric"
-                                }) : ""}
-                              </strong>
-                            </div>
                           </div>
 
                           <p className="m-0 text-justify">
-                            Please note that onboarding details and task assignments will be coordinated through our WhatsApp group. Ensure that you have accepted this appointment by the due date.
+                            Please note that onboarding details and task assignments will be coordinated through our WhatsApp group.
                           </p>
                         </div>
                       </div>
@@ -1124,12 +1081,6 @@ KARE IEEE EDUCATION SOCIETY`;
                           {`Hello ${approvalModalData.name} 👋,
 
 Congratulations! You have been selected for the role of *${approvedRole}* in the *KARE IEEE Education Society*.
-
-Please complete your confirmation/onboarding by *${approvalDueDate ? new Date(approvalDueDate).toLocaleDateString("en-IN", {
-                            day: "2-digit",
-                            month: "long",
-                            year: "numeric"
-                          }) : ""}*.
 
 We look forward to working with you!`}
                         </div>

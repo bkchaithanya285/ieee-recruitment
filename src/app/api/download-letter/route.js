@@ -112,60 +112,57 @@ export async function GET(request) {
     doc.setTextColor(51, 65, 85);
     
     const body1 = "Based on your performance in the recruitment interviews and evaluations held by the Executive Board, we are pleased to inform you that you have been selected to join the core team of KARE IEEE Education Society for the academic year 2026-2027.";
-    const body2 = "You are hereby appointed to the following position with immediate effect, subject to your formal confirmation:";
+    const body2 = "You are hereby appointed to the following position with immediate effect:";
 
     let currentY = 101;
     const splitBody1 = doc.splitTextToSize(body1, pageWidth - 30);
-    doc.text(splitBody1, 15, currentY, { align: "justify" });
+    doc.text(splitBody1, 15, currentY); // Removed justify alignment to prevent border crossing
     currentY += (splitBody1.length * 6) + 4;
 
     const splitBody2 = doc.splitTextToSize(body2, pageWidth - 30);
-    doc.text(splitBody2, 15, currentY, { align: "justify" });
+    doc.text(splitBody2, 15, currentY); // Removed justify alignment
     currentY += (splitBody2.length * 6) + 6;
 
-    // Details Box
+    // Details Box (Adjusted box size to fit 3 items)
     const boxStartY = currentY;
     doc.setFillColor(248, 250, 252);
-    doc.rect(15, boxStartY, pageWidth - 30, 42, "F");
+    doc.rect(15, boxStartY, pageWidth - 30, 33, "F");
     doc.setDrawColor(203, 213, 225);
     doc.setLineWidth(0.3);
-    doc.rect(15, boxStartY, pageWidth - 30, 42);
+    doc.rect(15, boxStartY, pageWidth - 30, 33);
 
     doc.setFont("times", "bold");
     doc.setTextColor(100, 116, 139);
-    doc.text("Appointee Name:", 20, boxStartY + 10);
-    doc.text("Assigned Role/Domain:", 20, boxStartY + 19);
-    doc.text("Organization:", 20, boxStartY + 28);
-    doc.text("Confirmation Due Date:", 20, boxStartY + 37);
+    doc.text("Appointee Name:", 20, boxStartY + 9);
+    doc.text("Assigned Role/Domain:", 20, boxStartY + 17);
+    doc.text("Organization:", 20, boxStartY + 25);
 
     doc.setTextColor(15, 23, 42);
-    doc.text(app.name, pageWidth - 20, boxStartY + 10, { align: "right" });
+    doc.text(app.name, pageWidth - 20, boxStartY + 9, { align: "right" });
     doc.setTextColor(0, 98, 155);
-    doc.text(app.approvedRole || app.priority1 || "Core Member", pageWidth - 20, boxStartY + 19, { align: "right" });
+    doc.text(app.approvedRole || app.priority1 || "Core Member", pageWidth - 20, boxStartY + 17, { align: "right" });
     doc.setTextColor(15, 23, 42);
-    doc.text("KARE IEEE Education Society", pageWidth - 20, boxStartY + 28, { align: "right" });
-    doc.setTextColor(220, 38, 38);
-    doc.text(app.dueDate || "As per schedule", pageWidth - 20, boxStartY + 37, { align: "right" });
+    doc.text("KARE IEEE Education Society", pageWidth - 20, boxStartY + 25, { align: "right" });
 
-    currentY = boxStartY + 42 + 8;
+    currentY = boxStartY + 33 + 8;
 
     doc.setFont("times", "normal");
     doc.setTextColor(51, 65, 85);
 
     const body3 = "As a core committee member, you will be expected to work collaboratively with your team members, demonstrate leadership quality, and actively contribute to the workshops, technical events, and initiatives organized by the chapter.";
-    const body4 = "Please note that onboarding details and task assignments will be coordinated through our WhatsApp group. Ensure that you have accepted this appointment and confirmed your onboarding details by the due date mentioned above.";
+    const body4 = "Please note that onboarding details and task assignments will be coordinated through our WhatsApp group.";
     const body5 = "Congratulations once again! We look forward to an outstanding tenure working together to drive academic and technical excellence.";
 
     const splitBody3 = doc.splitTextToSize(body3, pageWidth - 30);
-    doc.text(splitBody3, 15, currentY, { align: "justify" });
+    doc.text(splitBody3, 15, currentY); // Removed justify alignment
     currentY += (splitBody3.length * 6) + 4;
 
     const splitBody4 = doc.splitTextToSize(body4, pageWidth - 30);
-    doc.text(splitBody4, 15, currentY, { align: "justify" });
+    doc.text(splitBody4, 15, currentY); // Removed justify alignment
     currentY += (splitBody4.length * 6) + 4;
 
     const splitBody5 = doc.splitTextToSize(body5, pageWidth - 30);
-    doc.text(splitBody5, 15, currentY, { align: "justify" });
+    doc.text(splitBody5, 15, currentY); // Removed justify alignment
     currentY += (splitBody5.length * 6) + 8;
 
     // Regards

@@ -236,7 +236,7 @@ export async function getSubmissionEmailHtml(name) {
 /**
  * Generates selection notification HTML (styled like a colourful, table-based Appointment Order).
  */
-export async function getSelectionEmailHtml({ id, name, role, dueDate }) {
+export async function getSelectionEmailHtml({ id, name, role }) {
   const logoUrl = await getLogoUrl();
   const sigUrl = await getSigUrl();
 
@@ -362,16 +362,8 @@ export async function getSelectionEmailHtml({ id, name, role, dueDate }) {
                           
                           <!-- Row 3: Org -->
                           <tr>
-                            <td style="padding: 12px 0; border-bottom: 1px solid #e2e8f0; font-size: 14px; color: #64748b; font-weight: 600;">Organization:</td>
-                            <td align="right" style="padding: 12px 0; border-bottom: 1px solid #e2e8f0; font-size: 14px; color: #0F172A; font-weight: 700;">KARE IEEE Education Society</td>
-                          </tr>
-                          
-                          <!-- Row 4: Due Date -->
-                          <tr>
-                            <td style="padding: 12px 0; font-size: 14px; color: #64748b; font-weight: 600;">Confirmation Due Date:</td>
-                            <td align="right" style="padding: 12px 0;">
-                              <span class="due-date" style="color: #dc2626; background-color: #fee2e2; padding: 4px 10px; border-radius: 4px; font-size: 13px; font-weight: 700; border: 1px solid #fca5a5; display: inline-block;">${dueDate}</span>
-                            </td>
+                            <td style="padding: 12px 0; font-size: 14px; color: #64748b; font-weight: 600;">Organization:</td>
+                            <td align="right" style="padding: 12px 0; font-size: 14px; color: #0F172A; font-weight: 700;">KARE IEEE Education Society</td>
                           </tr>
                           
                         </table>
@@ -391,7 +383,7 @@ export async function getSelectionEmailHtml({ id, name, role, dueDate }) {
                   
                   <p style="font-size: 15px; color: #334155; margin: 0 0 22px 0; text-align: justify; line-height: 1.7;">As a core committee member, you will be expected to work collaboratively with your team members, demonstrate leadership quality, and actively contribute to the workshops, technical events, and initiatives organized by the chapter.</p>
                   
-                  <p style="font-size: 15px; color: #334155; margin: 0 0 22px 0; text-align: justify; line-height: 1.7;">Please note that onboarding details and task assignments will be coordinated through our WhatsApp group. Ensure that you have accepted this appointment and confirmed your onboarding details by the due date mentioned above.</p>
+                  <p style="font-size: 15px; color: #334155; margin: 0 0 22px 0; text-align: justify; line-height: 1.7;">Please note that onboarding details and task assignments will be coordinated through our WhatsApp group.</p>
                   
                   <p style="font-size: 15px; color: #334155; margin: 0 0 22px 0; text-align: justify; line-height: 1.7;">Congratulations once again! We look forward to an outstanding tenure working together to drive academic and technical excellence.</p>
                   
