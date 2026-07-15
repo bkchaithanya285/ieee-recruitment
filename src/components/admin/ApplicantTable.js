@@ -304,12 +304,12 @@ KARE IEEE EDUCATION SOCIETY`;
 
       // Title & Subtitle
       doc.setTextColor(15, 23, 42);
-      doc.setFont("helvetica", "bold");
+      doc.setFont("times", "bold");
       doc.setFontSize(16);
       doc.text("KARE IEEE EDUCATION SOCIETY", pageWidth / 2, 48, { align: "center" });
 
-      doc.setFont("helvetica", "normal");
-      doc.setFontSize(9);
+      doc.setFont("times", "italic");
+      doc.setFontSize(9.5);
       doc.setTextColor(100, 116, 139);
       doc.text("Kalasalingam Academy of Research and Education, Krishnankoil", pageWidth / 2, 53, { align: "center" });
 
@@ -322,7 +322,10 @@ KARE IEEE EDUCATION SOCIETY`;
       doc.setFont("courier", "bold");
       doc.setFontSize(10);
       doc.setTextColor(71, 85, 105);
-      const refNumber = `REF: KARE-IEEE-EDS-${new Date(app.timestamp || Date.now()).getFullYear()}-${app.registrationNumber.substring(app.registrationNumber.length - 4)}`;
+      const appYear = app.timestamp && app.timestamp.toDate 
+        ? app.timestamp.toDate().getFullYear() 
+        : new Date().getFullYear();
+      const refNumber = `REF: KARE-IEEE-EDS-${appYear}-${app.registrationNumber.substring(app.registrationNumber.length - 4)}`;
       const currentDate = new Date().toLocaleDateString("en-IN", {
         day: "2-digit",
         month: "long",
@@ -336,72 +339,81 @@ KARE IEEE EDUCATION SOCIETY`;
 
       // Document Title
       doc.setTextColor(0, 98, 155);
-      doc.setFont("helvetica", "bold");
-      doc.setFontSize(16);
+      doc.setFont("times", "bold");
+      doc.setFontSize(17);
       doc.text("OFFICIAL APPOINTMENT ORDER", pageWidth / 2, 82, { align: "center" });
 
       // Salutation
       doc.setTextColor(15, 23, 42);
-      doc.setFont("helvetica", "bold");
-      doc.setFontSize(11);
-      doc.text(`Dear ${app.name},`, 15, 96);
+      doc.setFont("times", "bold");
+      doc.setFontSize(12);
+      doc.text(`Dear ${app.name},`, 15, 94);
 
       // Body copy
-      doc.setFont("helvetica", "normal");
-      doc.setFontSize(10.5);
+      doc.setFont("times", "normal");
+      doc.setFontSize(11);
       doc.setTextColor(51, 65, 85);
       const body1 = "Based on your performance in the recruitment interviews and evaluations held by the Executive Board, we are pleased to inform you that you have been selected to join the core team of KARE IEEE Education Society for the academic year 2026-2027.";
       const body2 = "You are hereby appointed to the following position with immediate effect, subject to your formal confirmation:";
 
+      let currentY = 101;
       const splitBody1 = doc.splitTextToSize(body1, pageWidth - 30);
-      doc.text(splitBody1, 15, 103, { align: "justify" });
+      doc.text(splitBody1, 15, currentY, { align: "justify" });
+      currentY += (splitBody1.length * 6) + 4;
       
       const splitBody2 = doc.splitTextToSize(body2, pageWidth - 30);
-      doc.text(splitBody2, 15, 122, { align: "justify" });
+      doc.text(splitBody2, 15, currentY, { align: "justify" });
+      currentY += (splitBody2.length * 6) + 6;
 
       // Key details box
+      const boxStartY = currentY;
       doc.setFillColor(248, 250, 252);
-      doc.rect(15, 132, pageWidth - 30, 42, "F");
+      doc.rect(15, boxStartY, pageWidth - 30, 42, "F");
       doc.setDrawColor(203, 213, 225);
       doc.setLineWidth(0.3);
-      doc.rect(15, 132, pageWidth - 30, 42);
+      doc.rect(15, boxStartY, pageWidth - 30, 42);
 
-      doc.setFont("helvetica", "bold");
+      doc.setFont("times", "bold");
       doc.setTextColor(100, 116, 139);
-      doc.text("Appointee Name:", 20, 140);
-      doc.text("Assigned Role/Domain:", 20, 149);
-      doc.text("Organization:", 20, 158);
-      doc.text("Confirmation Due Date:", 20, 167);
+      doc.text("Appointee Name:", 20, boxStartY + 10);
+      doc.text("Assigned Role/Domain:", 20, boxStartY + 19);
+      doc.text("Organization:", 20, boxStartY + 28);
+      doc.text("Confirmation Due Date:", 20, boxStartY + 37);
 
       doc.setTextColor(15, 23, 42);
-      doc.text(app.name, pageWidth - 20, 140, { align: "right" });
+      doc.text(app.name, pageWidth - 20, boxStartY + 10, { align: "right" });
       doc.setTextColor(0, 98, 155);
-      doc.text(app.approvedRole || app.priority1 || "Core Member", pageWidth - 20, 149, { align: "right" });
+      doc.text(app.approvedRole || app.priority1 || "Core Member", pageWidth - 20, boxStartY + 19, { align: "right" });
       doc.setTextColor(15, 23, 42);
-      doc.text("KARE IEEE Education Society", pageWidth - 20, 158, { align: "right" });
+      doc.text("KARE IEEE Education Society", pageWidth - 20, boxStartY + 28, { align: "right" });
       doc.setTextColor(220, 38, 38); // Red
-      doc.text(app.dueDate || "As per schedule", pageWidth - 20, 167, { align: "right" });
+      doc.text(app.dueDate || "As per schedule", pageWidth - 20, boxStartY + 37, { align: "right" });
+
+      currentY = boxStartY + 42 + 8;
 
       // Core team expectations
-      doc.setFont("helvetica", "normal");
+      doc.setFont("times", "normal");
       doc.setTextColor(51, 65, 85);
       const body3 = "As a core committee member, you will be expected to work collaboratively with your team members, demonstrate leadership quality, and actively contribute to the workshops, technical events, and initiatives organized by the chapter.";
       const body4 = "Please note that onboarding details and task assignments will be coordinated through our WhatsApp group. Ensure that you have accepted this appointment and confirmed your onboarding details by the due date mentioned above.";
       const body5 = "Congratulations once again! We look forward to an outstanding tenure working together to drive academic and technical excellence.";
 
       const splitBody3 = doc.splitTextToSize(body3, pageWidth - 30);
-      doc.text(splitBody3, 15, 184, { align: "justify" });
+      doc.text(splitBody3, 15, currentY, { align: "justify" });
+      currentY += (splitBody3.length * 6) + 4;
       const splitBody4 = doc.splitTextToSize(body4, pageWidth - 30);
-      doc.text(splitBody4, 15, 202, { align: "justify" });
+      doc.text(splitBody4, 15, currentY, { align: "justify" });
+      currentY += (splitBody4.length * 6) + 4;
       const splitBody5 = doc.splitTextToSize(body5, pageWidth - 30);
-      doc.text(splitBody5, 15, 222, { align: "justify" });
+      doc.text(splitBody5, 15, currentY, { align: "justify" });
+      currentY += (splitBody5.length * 6) + 8;
 
       // Regards text
-      doc.setFont("helvetica", "bold");
+      doc.setFont("times", "bold");
       doc.setTextColor(15, 23, 42);
-      doc.text("Regards,", 15, 238);
+      doc.text("Regards,", 15, currentY);
       doc.setTextColor(0, 98, 155);
-      doc.text("KARE IEEE Education Society", 15, 243);
+      doc.text("KARE IEEE Education Society", 15, currentY + 5);
 
       // Signature line & image
       try {
@@ -420,7 +432,7 @@ KARE IEEE EDUCATION SOCIETY`;
           img.onerror = (e) => reject(e);
           img.src = sigUrl;
         });
-        doc.addImage(sigBase64, "JPEG", (pageWidth - 30) / 2, 252, 30, 15);
+        doc.addImage(sigBase64, "JPEG", (pageWidth - 30) / 2, currentY + 12, 30, 15);
       } catch (err) {
         console.error("Failed to add signature to PDF:", err);
       }
@@ -428,18 +440,18 @@ KARE IEEE EDUCATION SOCIETY`;
       // Signature metadata
       doc.setDrawColor(148, 163, 184);
       doc.setLineWidth(0.5);
-      doc.line((pageWidth - 60) / 2, 270, (pageWidth + 60) / 2, 270);
+      doc.line((pageWidth - 60) / 2, currentY + 30, (pageWidth + 60) / 2, currentY + 30);
 
       doc.setTextColor(15, 23, 42);
-      doc.setFont("helvetica", "bold");
+      doc.setFont("times", "bold");
       doc.setFontSize(9.5);
-      doc.text("Dr. P. Chinnasamy", pageWidth / 2, 274, { align: "center" });
+      doc.text("Dr. P. Chinnasamy", pageWidth / 2, currentY + 34, { align: "center" });
 
       doc.setTextColor(100, 116, 139);
-      doc.setFont("helvetica", "normal");
+      doc.setFont("times", "normal");
       doc.setFontSize(8.5);
-      doc.text("SBC COUNSELLOR", pageWidth / 2, 278, { align: "center" });
-      doc.text("KARE IEEE Education Society", pageWidth / 2, 282, { align: "center" });
+      doc.text("SBC COUNSELLOR", pageWidth / 2, currentY + 38, { align: "center" });
+      doc.text("KARE IEEE Education Society", pageWidth / 2, currentY + 42, { align: "center" });
 
       doc.save(`Appointment_Order_${app.name.replace(/\s+/g, "_")}.pdf`);
       addToast("Appointment Order downloaded successfully!", "success");

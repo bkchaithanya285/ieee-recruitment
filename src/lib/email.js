@@ -236,9 +236,23 @@ export async function getSubmissionEmailHtml(name) {
 /**
  * Generates selection notification HTML (styled like a colourful, table-based Appointment Order).
  */
-export async function getSelectionEmailHtml({ name, role, dueDate }) {
+export async function getSelectionEmailHtml({ id, name, role, dueDate }) {
   const logoUrl = await getLogoUrl();
   const sigUrl = await getSigUrl();
+
+  // Resolve base URL for the download link
+  let baseUrl = "https://ieee-recruitment-c1870.vercel.app";
+  try {
+    const headersList = await headers();
+    const host = headersList.get("host");
+    if (host) {
+      const protocol = host.includes("localhost") || host.includes("127.0.0.1") ? "http" : "https";
+      baseUrl = `${protocol}://${host}`;
+    }
+  } catch (error) {
+    // Suppress error
+  }
+
   const refNumber = `KARE-IEEE-EDS-${new Date().getFullYear()}-${Math.floor(1000 + Math.random() * 9000)}`;
   const currentDate = new Date().toLocaleDateString("en-IN", {
     day: "2-digit",
@@ -362,6 +376,15 @@ export async function getSelectionEmailHtml({ name, role, dueDate }) {
                           
                         </table>
                         
+                      </td>
+                    </tr>
+                  </table>
+                  
+                  <!-- Download PDF Letter CTA Button -->
+                  <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin: 25px 0 10px 0;">
+                    <tr>
+                      <td align="center">
+                        <a href="${baseUrl}/api/download-letter?id=${id}" target="_blank" style="display: inline-block; background-color: #00629B; color: #ffffff !important; text-decoration: none; padding: 15px 36px; font-size: 14px; font-weight: 800; border-radius: 30px; text-transform: uppercase; letter-spacing: 1.2px; box-shadow: 0 6px 20px rgba(0, 98, 155, 0.3);">Download Appointment Letter (PDF)</a>
                       </td>
                     </tr>
                   </table>

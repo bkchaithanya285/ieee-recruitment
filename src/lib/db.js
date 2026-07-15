@@ -161,6 +161,7 @@ export async function approveApplicantWithRole(id, role, dueDate) {
         toName: appData.name,
         subject: `Appointment Order: Selection for ${role} - KARE IEEE Education Society`,
         htmlContent: await getSelectionEmailHtml({
+          id: id,
           name: appData.name,
           role: role,
           dueDate: dueDate
