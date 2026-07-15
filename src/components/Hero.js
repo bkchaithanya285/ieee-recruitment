@@ -2,6 +2,7 @@
 
 import { useEffect, useRef } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import { motion } from "framer-motion";
 import { FaCode, FaBrain, FaDatabase, FaGlobe, FaMobileAlt, FaLaptopCode } from "react-icons/fa";
 
@@ -188,7 +189,7 @@ export default function Hero() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.4 }}
-          className="flex flex-col sm:flex-row gap-4 justify-center w-full max-w-md"
+          className="flex flex-col sm:flex-row gap-4 justify-center w-full max-w-xl"
         >
           <a
             href="#apply"
@@ -204,6 +205,12 @@ export default function Hero() {
           >
             Learn More
           </a>
+          <Link
+            href="/status"
+            className="py-4 px-8 rounded-full bg-ieee-accent/15 border border-ieee-accent/30 text-ieee-accent hover:bg-ieee-accent hover:text-slate-900 transition-all duration-300 hover:-translate-y-1 text-center font-bold text-base shadow-md"
+          >
+            Check Status
+          </Link>
         </motion.div>
 
       </div>
