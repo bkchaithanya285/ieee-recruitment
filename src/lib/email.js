@@ -269,7 +269,7 @@ export async function getSubmissionEmailHtml(name) {
             
             <p style="margin-top: 35px; border-t: 1px solid #f1f5f9; padding-top: 20px;">
               Regards,<br>
-              <strong>KARE IEEE Education Society Recruitment Cell</strong>
+              <strong>KARE IEEE Education Society</strong>
             </p>
           </div>
           <div class="footer">
@@ -540,6 +540,11 @@ export async function getSelectionEmailHtml({ name, role, dueDate }) {
             
             <p>Congratulations once again! We look forward to an outstanding tenure working together to drive academic and technical excellence.</p>
             
+            <p style="margin-top: 30px; margin-bottom: 30px;">
+              Regards,<br>
+              <strong>KARE IEEE Education Society</strong>
+            </p>
+
             <div class="signatures">
               <div class="sig-block">
                 <div class="sig-line" style="margin-top: 35px;"></div>
