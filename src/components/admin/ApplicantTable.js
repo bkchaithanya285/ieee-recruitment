@@ -15,9 +15,10 @@ import {
   FaSortAmountUp,
   FaSpinner,
   FaUserCheck,
-  FaFileAlt
+  FaFileAlt,
+  FaEnvelope
 } from "react-icons/fa";
-import { updateApplicantStatus, deleteApplicant } from "@/lib/db";
+import { updateApplicantStatus, deleteApplicant, approveApplicantWithRole } from "@/lib/db";
 import { useToast } from "@/context/ToastContext";
 
 const DEPT_OPTIONS = ["CSE", "ECE", "OTHER"];
@@ -56,6 +57,12 @@ export default function ApplicantTable({ applicants, onFilteredChange, refreshDa
   const [selectedApplicant, setSelectedApplicant] = useState(null);
   const [deleteConfirmId, setDeleteConfirmId] = useState(null);
   const [actionLoading, setActionLoading] = useState(false);
+
+  // Approval flow states
+  const [approvalModalData, setApprovalModalData] = useState(null);
+  const [approvedRole, setApprovedRole] = useState("");
+  const [approvalDueDate, setApprovalDueDate] = useState("");
+  const [previewTab, setPreviewTab] = useState("email"); // 'email' or 'whatsapp'
 
   // Apply filters, searches, and sorts
   const processedApplicants = useMemo(() => {
@@ -115,6 +122,27 @@ export default function ApplicantTable({ applicants, onFilteredChange, refreshDa
   }, [search, deptFilter, yearFilter, statusFilter, roleFilter]);
 
   const handleStatusChange = async (id, newStatus) => {
+    if (newStatus === "approved") {
+      const app = applicants.find(a => a.id === id);
+      if (app) {
+        setApprovalModalData({
+          id: app.id,
+          name: app.name,
+          email: app.email,
+          phone: app.phone,
+          priority1: app.priority1 || ROLE_OPTIONS[0],
+          priority2: app.priority2,
+          priority3: app.priority3
+        });
+        setApprovedRole(app.priority1 || ROLE_OPTIONS[0]);
+        // Set default due date to 3 days from now
+        const d = new Date();
+        d.setDate(d.getDate() + 3);
+        setApprovalDueDate(d.toISOString().split("T")[0]);
+      }
+      return;
+    }
+
     setActionLoading(true);
     try {
       await updateApplicantStatus(id, newStatus);
@@ -131,6 +159,56 @@ export default function ApplicantTable({ applicants, onFilteredChange, refreshDa
     } catch (error) {
       console.error("Status update error:", error);
       addToast("Failed to update applicant status.", "error");
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const handleConfirmApproval = async (sendWhatsapp = false) => {
+    if (!approvalModalData) return;
+    setActionLoading(true);
+    try {
+      const readableDate = new Date(approvalDueDate).toLocaleDateString("en-IN", {
+        day: "2-digit",
+        month: "long",
+        year: "numeric"
+      });
+
+      await approveApplicantWithRole(approvalModalData.id, approvedRole, readableDate);
+      addToast(`Applicant approved as ${approvedRole}! Appointment Order sent.`, "success");
+      
+      if (refreshData) {
+        await refreshData();
+      }
+      
+      // Update details modal if open
+      if (selectedApplicant && selectedApplicant.id === approvalModalData.id) {
+        setSelectedApplicant(prev => ({ 
+          ...prev, 
+          status: "approved",
+          approvedRole: approvedRole,
+          dueDate: readableDate
+        }));
+      }
+
+      if (sendWhatsapp) {
+        const rawMessage = `Hello ${approvalModalData.name} 👋,
+
+Congratulations! You have been selected for the role of *${approvedRole}* in the *KARE IEEE Education Society*.
+
+Please complete your confirmation/onboarding by *${readableDate}*.
+
+We look forward to working with you!`;
+        const encodedMessage = encodeURIComponent(rawMessage);
+        const link = `https://wa.me/91${approvalModalData.phone}?text=${encodedMessage}`;
+        window.open(link, "_blank");
+        addToast("Opening WhatsApp chat...", "info");
+      }
+
+      setApprovalModalData(null);
+    } catch (error) {
+      console.error("Approval error:", error);
+      addToast("Failed to approve applicant.", "error");
     } finally {
       setActionLoading(false);
     }
@@ -617,6 +695,264 @@ KARE IEEE EDUCATION SOCIETY`;
                 {actionLoading ? "Deleting..." : "Delete Permanently"}
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Role & Due Date Selection Approval Modal */}
+      {approvalModalData && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-sm p-4 overflow-y-auto">
+          <div className="glass-panel w-full max-w-4xl border-white/8 bg-[#0A192F] shadow-2xl p-6 sm:p-8 relative max-h-[90vh] overflow-y-auto">
+            
+            {/* Header */}
+            <div className="flex items-center justify-between border-b border-white/5 pb-4 mb-6">
+              <div className="flex items-center space-x-3">
+                <div className="p-2.5 rounded-xl bg-emerald-950/40 text-emerald-400 border border-emerald-500/30">
+                  <FaUserCheck size={18} />
+                </div>
+                <div>
+                  <h3 className="text-lg font-bold text-white leading-tight">
+                    Select Role & Approve: {approvalModalData.name}
+                  </h3>
+                  <p className="text-slate-400 text-xs mt-0.5 font-semibold">
+                    Send Appointment Order via Brevo & WhatsApp Greeting
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={() => setApprovalModalData(null)}
+                className="text-slate-400 hover:text-white font-extrabold text-lg p-2 rounded-md hover:bg-white/5"
+              >
+                &times;
+              </button>
+            </div>
+
+            {/* Form & Previews Grid */}
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 text-sm">
+              
+              {/* Left Column: Input Settings (5/12 cols) */}
+              <div className="lg:col-span-5 space-y-6">
+                
+                {/* Select Approved Role */}
+                <div className="flex flex-col">
+                  <label className="text-slate-300 font-semibold text-xs tracking-wider uppercase mb-2">
+                    Approved Role / Domain
+                  </label>
+                  <select
+                    value={approvedRole}
+                    onChange={(e) => setApprovedRole(e.target.value)}
+                    className="w-full bg-[#020C1B] border border-white/8 rounded-xl px-4 py-3 text-sm font-semibold text-white focus:outline-none focus:border-ieee-accent transition-all cursor-pointer"
+                  >
+                    {ROLE_OPTIONS.map((r) => (
+                      <option key={r} value={r}>
+                        {r}
+                      </option>
+                    ))}
+                  </select>
+
+                  {/* Applicant's Choices Info */}
+                  <div className="mt-3 p-3 bg-white/2 border border-white/5 rounded-xl space-y-1.5 text-xs">
+                    <span className="text-slate-500 text-[10px] uppercase font-bold tracking-wider block">
+                      Applicant's Preferred Roles:
+                    </span>
+                    <div className="flex justify-between">
+                      <span className="text-slate-400 font-medium">1st Choice:</span>
+                      <strong className="text-white font-semibold">{approvalModalData.priority1 || "None"}</strong>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-slate-400 font-medium">2nd Choice:</span>
+                      <strong className="text-slate-400">{approvalModalData.priority2 || "None"}</strong>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-slate-400 font-medium">3rd Choice:</span>
+                      <strong className="text-slate-400">{approvalModalData.priority3 || "None"}</strong>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Select Onboarding Due Date */}
+                <div className="flex flex-col">
+                  <label className="text-slate-300 font-semibold text-xs tracking-wider uppercase mb-2">
+                    Confirmation/Onboarding Due Date
+                  </label>
+                  <input
+                    type="date"
+                    value={approvalDueDate}
+                    onChange={(e) => setApprovalDueDate(e.target.value)}
+                    className="w-full bg-[#020C1B] border border-white/8 rounded-xl px-4 py-3 text-sm font-semibold text-white focus:outline-none focus:border-ieee-accent transition-all cursor-pointer"
+                  />
+                  <p className="text-slate-500 text-[10.5px] mt-1.5 leading-normal">
+                    This is the deadline given to the applicant in their Appointment Order to confirm their selection.
+                  </p>
+                </div>
+
+              </div>
+
+              {/* Right Column: Previews Tab Panel (7/12 cols) */}
+              <div className="lg:col-span-7 flex flex-col h-full min-h-[300px]">
+                
+                {/* Preview Tabs */}
+                <div className="flex space-x-2 border-b border-white/5 pb-2.5 mb-4">
+                  <button
+                    type="button"
+                    onClick={() => setPreviewTab("email")}
+                    className={`px-4 py-2 rounded-lg font-bold text-xs uppercase tracking-wider transition-all flex items-center space-x-2 ${
+                      previewTab === "email"
+                        ? "bg-ieee-blue text-white shadow-md"
+                        : "text-slate-400 hover:text-white hover:bg-white/3"
+                    }`}
+                  >
+                    <FaEnvelope size={12} />
+                    <span>Email Order Preview</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setPreviewTab("whatsapp")}
+                    className={`px-4 py-2 rounded-lg font-bold text-xs uppercase tracking-wider transition-all flex items-center space-x-2 ${
+                      previewTab === "whatsapp"
+                        ? "bg-emerald-600 text-white shadow-md"
+                        : "text-slate-400 hover:text-white hover:bg-white/3"
+                    }`}
+                  >
+                    <FaWhatsapp size={12} />
+                    <span>WhatsApp Preview</span>
+                  </button>
+                </div>
+
+                {/* Previews Box */}
+                <div className="flex-grow bg-[#020C1B] border border-white/5 rounded-2xl p-5 overflow-y-auto max-h-[350px]">
+                  
+                  {previewTab === "email" ? (
+                    // Email Preview Mock
+                    <div className="space-y-4 font-sans text-slate-300 text-xs">
+                      <div className="border-b border-white/5 pb-3">
+                        <div className="flex justify-between mb-1">
+                          <span className="text-slate-500">Sender:</span>
+                          <span className="text-white font-semibold">ieee.edusoc.kare@gmail.com</span>
+                        </div>
+                        <div className="flex justify-between mb-1">
+                          <span className="text-slate-500">To:</span>
+                          <span className="text-white font-semibold truncate max-w-[200px]">{approvalModalData.email}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-slate-500">Subject:</span>
+                          <span className="text-ieee-accent font-semibold truncate max-w-[250px]">
+                            Appointment Order: Selection for {approvedRole}
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Mock Appointment Order */}
+                      <div className="bg-white text-slate-800 p-6 rounded-lg shadow-inner max-w-md mx-auto space-y-4">
+                        <div className="text-center border-b border-slate-200 pb-3">
+                          <strong className="text-[11px] uppercase tracking-wider text-slate-900 block font-extrabold">
+                            KARE IEEE Education Society
+                          </strong>
+                          <span className="text-[9px] text-slate-500 font-semibold block">
+                            Kalasalingam Academy of Research and Education
+                          </span>
+                        </div>
+                        
+                        <div className="text-center font-bold text-slate-900 text-xs uppercase tracking-widest underline decoration-2">
+                          Official Appointment Order
+                        </div>
+
+                        <div className="space-y-2 text-[10px] leading-relaxed text-slate-700">
+                          <p className="font-bold text-slate-900 m-0">Dear {approvalModalData.name},</p>
+                          <p className="m-0 text-justify">
+                            We are pleased to inform you that you have been selected to join the core team of <strong>KARE IEEE Education Society</strong> for the academic year 2026-2027.
+                          </p>
+                          
+                          <div className="bg-slate-50 border border-slate-200 rounded p-2.5 my-3 space-y-1">
+                            <div className="flex justify-between">
+                              <span className="text-slate-500 font-semibold">Assigned Role:</span>
+                              <strong className="text-slate-900">{approvedRole}</strong>
+                            </div>
+                            <div className="flex justify-between">
+                              <span className="text-slate-500 font-semibold">Due Date:</span>
+                              <strong className="text-rose-600">
+                                {approvalDueDate ? new Date(approvalDueDate).toLocaleDateString("en-IN", {
+                                  day: "2-digit",
+                                  month: "long",
+                                  year: "numeric"
+                                }) : ""}
+                              </strong>
+                            </div>
+                          </div>
+
+                          <p className="m-0 text-justify">
+                            Please note that onboarding details and task assignments will be coordinated through our WhatsApp group. Ensure that you have accepted this appointment by the due date.
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  ) : (
+                    // WhatsApp Chat Mock Preview
+                    <div className="space-y-4 font-sans text-xs flex flex-col justify-end h-full">
+                      <div className="bg-emerald-950/20 border border-emerald-500/20 text-emerald-400 p-2.5 rounded-lg flex items-center space-x-2 mb-2 font-bold text-[10px] uppercase tracking-wider">
+                        <FaWhatsapp size={14} />
+                        <span>Pre-typed message layout:</span>
+                      </div>
+                      
+                      {/* Chat Bubbles */}
+                      <div className="flex flex-col space-y-3">
+                        <div className="self-end bg-[#056162] text-white p-3 rounded-lg rounded-tr-none shadow-md max-w-[85%] space-y-2 font-mono whitespace-pre-line text-[11px] leading-relaxed border border-emerald-500/10">
+                          {`Hello ${approvalModalData.name} 👋,
+
+Congratulations! You have been selected for the role of *${approvedRole}* in the *KARE IEEE Education Society*.
+
+Please complete your confirmation/onboarding by *${approvalDueDate ? new Date(approvalDueDate).toLocaleDateString("en-IN", {
+                            day: "2-digit",
+                            month: "long",
+                            year: "numeric"
+                          }) : ""}*.
+
+We look forward to working with you!`}
+                        </div>
+                        <div className="self-end text-[9px] text-slate-500 pr-1 select-none">
+                          Delivered • Message ready to send
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                </div>
+
+              </div>
+
+            </div>
+
+            {/* Footer buttons */}
+            <div className="flex flex-col sm:flex-row gap-3 justify-end items-center border-t border-white/5 pt-6 mt-6">
+              <button
+                type="button"
+                onClick={() => setApprovalModalData(null)}
+                className="w-full sm:w-auto py-3 px-6 rounded-xl border border-white/8 text-slate-400 hover:text-white font-bold text-xs transition-all cursor-pointer"
+              >
+                Cancel
+              </button>
+
+              <button
+                type="button"
+                onClick={() => handleConfirmApproval(true)}
+                disabled={actionLoading}
+                className="w-full sm:w-auto py-3 px-6 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs flex items-center justify-center space-x-2 transition-all cursor-pointer border border-emerald-500/25 shadow-md shadow-emerald-950/50"
+              >
+                <FaWhatsapp size={14} />
+                <span>{actionLoading ? "Processing..." : "Approve & Send WhatsApp"}</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => handleConfirmApproval(false)}
+                disabled={actionLoading}
+                className="w-full sm:w-auto py-3 px-6 rounded-xl bg-ieee-blue hover:bg-ieee-light text-white font-bold text-xs flex items-center justify-center space-x-2 transition-all cursor-pointer border border-ieee-accent/25 shadow-md shadow-ieee-blue/20"
+              >
+                <FaEnvelope size={14} />
+                <span>{actionLoading ? "Processing..." : "Approve & Email Only"}</span>
+              </button>
+            </div>
+
           </div>
         </div>
       )}

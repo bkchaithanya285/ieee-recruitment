@@ -2,6 +2,7 @@
 
 import { adminDb } from "./firebaseAdmin";
 import admin from "firebase-admin";
+import { sendEmail, getSubmissionEmailHtml, getSelectionEmailHtml } from "./email";
 
 /**
  * Checks if a registration number already exists in the Applicants collection.
@@ -65,6 +66,19 @@ export async function submitApplicant(data) {
   };
   
   const docRef = await adminDb.collection("Applicants").add(payload);
+
+  // Send submission email using Brevo
+  try {
+    await sendEmail({
+      to: payload.email,
+      toName: payload.name,
+      subject: "Application Submitted Successfully - KARE IEEE Education Society",
+      htmlContent: getSubmissionEmailHtml(payload.name)
+    });
+  } catch (emailError) {
+    console.error("Failed to send submission email:", emailError);
+  }
+
   return { id: docRef.id };
 }
 
@@ -94,6 +108,8 @@ export async function getApplicants() {
         priority2: data.priority2 || "",
         priority3: data.priority3 || "",
         status: data.status || "pending",
+        approvedRole: data.approvedRole || "",
+        dueDate: data.dueDate || "",
         timestamp: data.timestamp ? (data.timestamp.toDate ? data.timestamp.toDate().getTime() : new Date(data.timestamp).getTime()) : null,
       };
     });
@@ -116,6 +132,45 @@ export async function updateApplicantStatus(id, newStatus) {
     return { success: true };
   } catch (error) {
     console.error("Error updating status:", error);
+    throw error;
+  }
+}
+
+/**
+ * Approves an applicant with a specific role and due date, then sends the appointment email (Server Action).
+ * @param {string} id 
+ * @param {string} role 
+ * @param {string} dueDate 
+ * @returns {Promise<object>}
+ */
+export async function approveApplicantWithRole(id, role, dueDate) {
+  if (!adminDb) throw new Error("Database not initialized");
+  try {
+    const docRef = adminDb.collection("Applicants").doc(id);
+    await docRef.update({
+      status: "approved",
+      approvedRole: role,
+      dueDate: dueDate
+    });
+
+    const doc = await docRef.get();
+    const appData = doc.data();
+    if (appData && appData.email) {
+      await sendEmail({
+        to: appData.email,
+        toName: appData.name,
+        subject: `Appointment Order: Selection for ${role} - KARE IEEE Education Society`,
+        htmlContent: getSelectionEmailHtml({
+          name: appData.name,
+          role: role,
+          dueDate: dueDate
+        })
+      });
+    }
+
+    return { success: true };
+  } catch (error) {
+    console.error("Error in approveApplicantWithRole:", error);
     throw error;
   }
 }
