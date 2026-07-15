@@ -595,15 +595,11 @@ export async function getSelectionEmailHtml({ name, role, dueDate }) {
               <h3 class="regards-team">KARE IEEE Education Society</h3>
             </div>
 
-            <div class="signatures">
-              <div class="sig-block">
+            <div class="signatures" style="justify-content: center;">
+              <div class="sig-block" style="width: 100%; max-width: 280px;">
                 <div class="sig-line" style="margin-top: 35px;"></div>
-                <div class="sig-name">Executive Board</div>
-                <div class="sig-title">IEEE Student Branch Coord.</div>
-              </div>
-              <div class="sig-block">
-                <div class="sig-line" style="margin-top: 35px;"></div>
-                <div class="sig-name">Faculty Advisor</div>
+                <div class="sig-name">Dr. P. Chinnasamy</div>
+                <div class="sig-title">SBC COUNSELLOR</div>
                 <div class="sig-title">KARE IEEE Education Society</div>
               </div>
             </div>
