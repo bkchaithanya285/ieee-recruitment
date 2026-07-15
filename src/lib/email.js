@@ -3,7 +3,28 @@
  * Sends transactional emails using Brevo REST API v3.
  */
 
+import { headers } from "next/headers";
+
 const BREVO_API_URL = "https://api.brevo.com/v3/smtp/email";
+
+/**
+ * Dynamically resolves the absolute logo URL depending on the environment.
+ * Falls back safely if executed outside a Next.js request context (e.g. scripts).
+ */
+async function getLogoUrl() {
+  try {
+    const headersList = await headers();
+    const host = headersList.get("host");
+    if (host) {
+      const protocol = host.includes("localhost") || host.includes("127.0.0.1") ? "http" : "https";
+      return `${protocol}://${host}/logo.jpg`;
+    }
+  } catch (error) {
+    // Suppress error when run outside Next.js request context (e.g., node test scripts)
+  }
+  // Hardcoded fallback to the production URL on Vercel
+  return "https://ieee-recruitment-c1870.vercel.app/logo.jpg";
+}
 
 /**
  * Sends an email using Brevo's SMTP API.
@@ -17,7 +38,7 @@ const BREVO_API_URL = "https://api.brevo.com/v3/smtp/email";
  */
 export async function sendEmail({ to, toName, subject, htmlContent }) {
   const apiKey = process.env.BREVO_API_KEY;
-  const senderEmail = process.env.BREVO_SENDER_EMAIL || "ieee.edusoc.kare@gmail.com";
+  const senderEmail = process.env.BREVO_SENDER_EMAIL || "ieeeeducation@klu.ac.in";
   const senderName = process.env.BREVO_SENDER_NAME || "KARE IEEE Education Society";
 
   if (!apiKey) {
@@ -65,12 +86,11 @@ export async function sendEmail({ to, toName, subject, htmlContent }) {
 }
 
 /**
- * Generates submission confirmation HTML.
- * Matches WhatsApp greeting style with an elegant layout.
+ * Generates a colorful, high-fidelity submission confirmation HTML.
  */
-export function getSubmissionEmailHtml(name) {
+export async function getSubmissionEmailHtml(name) {
   const whatsappLink = "https://chat.whatsapp.com/LEVdBbZvnnEI3Flh1SKX6Y?s=cl&p=a&ilr=0";
-  const logoUrl = "https://education.ieee.org/wp-content/uploads/2018/09/IEEE_Education_Society_Logo_Color.png";
+  const logoUrl = await getLogoUrl();
 
   return `
     <!DOCTYPE html>
@@ -81,109 +101,137 @@ export function getSubmissionEmailHtml(name) {
       <title>Application Received</title>
       <style>
         body {
-          font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-          background-color: #f6f9fc;
+          font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+          background-color: #f0f4f8;
           margin: 0;
           padding: 0;
           -webkit-font-smoothing: antialiased;
         }
         .wrapper {
           width: 100%;
-          background-color: #f6f9fc;
-          padding: 30px 0;
+          background-color: #f0f4f8;
+          padding: 40px 0;
         }
         .container {
           max-width: 600px;
           margin: 0 auto;
           background-color: #ffffff;
-          border-radius: 12px;
-          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+          border-radius: 16px;
+          box-shadow: 0 10px 25px rgba(12, 26, 48, 0.05);
           overflow: hidden;
-          border: 1px solid #eef2f6;
+          border: 1px solid #e2e8f0;
         }
         .header {
-          background-color: #0c1a30;
-          padding: 30px 20px;
+          background: linear-gradient(135deg, #0A192F 0%, #00629B 100%);
+          padding: 35px 20px;
           text-align: center;
-          border-bottom: 3px solid #00629B;
+          position: relative;
         }
         .header img {
-          max-height: 55px;
+          max-height: 60px;
           display: inline-block;
+          background-color: #ffffff;
+          padding: 5px 12px;
+          border-radius: 8px;
+          box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .header-glow {
+          position: absolute;
+          bottom: 0;
+          left: 0;
+          right: 0;
+          height: 4px;
+          background: linear-gradient(90deg, #00B4FF 0%, #10B981 100%);
         }
         .content {
           padding: 40px 35px;
-          color: #333333;
+          color: #334155;
           line-height: 1.6;
         }
         h2 {
-          color: #0c1a30;
-          font-size: 22px;
+          color: #0F172A;
+          font-size: 24px;
           margin-top: 0;
-          margin-bottom: 20px;
+          margin-bottom: 8px;
+          font-weight: 800;
+          text-align: center;
+        }
+        .subtitle {
+          color: #00B4FF;
+          font-size: 14px;
           font-weight: 700;
+          text-transform: uppercase;
+          letter-spacing: 1.5px;
+          text-align: center;
+          margin-bottom: 25px;
+          margin-top: 0;
         }
         p {
           font-size: 15px;
-          color: #4a5568;
+          color: #475569;
           margin-bottom: 20px;
         }
         .card {
-          background-color: #f7fafc;
-          border-left: 4px solid #319795;
-          padding: 20px;
-          margin: 25px 0;
-          border-radius: 4px;
+          background-color: #f0fdf4;
+          border-left: 5px solid #10b981;
+          padding: 22px;
+          margin: 28px 0;
+          border-radius: 8px;
+          box-shadow: 0 4px 6px rgba(16, 185, 129, 0.02);
         }
         .card-title {
-          font-weight: 700;
-          color: #2d3748;
+          font-weight: 800;
+          color: #065f46;
           margin-bottom: 8px;
-          font-size: 14px;
+          font-size: 13.5px;
           text-transform: uppercase;
-          letter-spacing: 0.5px;
+          letter-spacing: 0.8px;
+          display: flex;
+          align-items: center;
         }
         .card-text {
-          font-size: 13.5px;
-          color: #4a5568;
+          font-size: 14px;
+          color: #047857;
           margin: 0;
+          line-height: 1.5;
         }
         .btn-whatsapp {
-          display: inline-flex;
-          align-items: center;
+          display: inline-block;
           background-color: #25D366;
           color: #ffffff !important;
           text-decoration: none;
-          padding: 14px 28px;
-          font-size: 14px;
-          font-weight: 700;
-          border-radius: 8px;
+          padding: 15px 32px;
+          font-size: 13.5px;
+          font-weight: 800;
+          border-radius: 30px;
           text-transform: uppercase;
-          letter-spacing: 1px;
-          box-shadow: 0 4px 6px rgba(37, 211, 102, 0.2);
-          transition: background-color 0.2s;
+          letter-spacing: 1.2px;
+          box-shadow: 0 6px 20px rgba(37, 211, 102, 0.3);
+          transition: background-color 0.2s, transform 0.2s;
           margin: 15px 0;
         }
         .btn-whatsapp:hover {
           background-color: #1ebe5d;
         }
         .footer {
-          background-color: #f7fafc;
-          padding: 25px 20px;
+          background-color: #f8fafc;
+          padding: 30px 20px;
           text-align: center;
           font-size: 12px;
-          color: #718096;
-          border-top: 1px solid #edf2f7;
+          color: #64748b;
+          border-top: 1px solid #f1f5f9;
         }
         .footer a {
           color: #00629B;
           text-decoration: none;
+          font-weight: 700;
         }
         .footer-logo {
           font-weight: 800;
-          color: #0c1a30;
+          color: #0F172A;
           letter-spacing: 1px;
-          margin-bottom: 5px;
+          margin-bottom: 6px;
+          font-size: 13px;
         }
       </style>
     </head>
@@ -192,37 +240,42 @@ export function getSubmissionEmailHtml(name) {
         <div class="container">
           <div class="header">
             <!-- IEEE Education Society Logo -->
-            <img src="${logoUrl}" alt="IEEE Education Society Logo">
+            <img src="${logoUrl}" alt="KARE IEEE Education Society Logo">
+            <div class="header-glow"></div>
           </div>
           <div class="content">
             <h2>Application Reached Us! 🎉</h2>
+            <div class="subtitle">KARE IEEE Education Society</div>
             <p>Hello <strong>${name}</strong>,</p>
-            <p>Thank you for applying to join the <strong>KARE IEEE Education Society</strong>. We have successfully received your application, and our student coordinators will verify your registration details shortly.</p>
+            <p>Thank you for submitting your application to join the <strong>KARE IEEE Education Society</strong> core committee. We have successfully registered your application, and our coordinators will verify your details shortly.</p>
             
             <div class="card">
               <div class="card-title">⚠️ Mandatory Next Step</div>
-              <p class="card-text">All recruitment updates, interview slot selections, technical test schedules, and results will be announced <strong>exclusively</strong> within our official WhatsApp community group.</p>
+              <p class="card-text">All recruitment updates, interview slot links, technical test schedules, and final announcements will be shared <strong>exclusively</strong> inside our official WhatsApp community group.</p>
             </div>
             
-            <p>If you haven't joined yet, please click the button below to join the WhatsApp group immediately to ensure you don't miss your interview slot:</p>
+            <p style="text-align: center;">Please click the button below to join the WhatsApp group immediately to ensure you don't miss your interview slot:</p>
             
-            <div style="text-align: center; margin: 30px 0 10px 0;">
+            <div style="text-align: center; margin: 25px 0;">
               <!-- WhatsApp green CTA button -->
               <a href="${whatsappLink}" target="_blank" class="btn-whatsapp">
-                Join Official WhatsApp Group
+                Open WhatsApp Group
               </a>
             </div>
             
-            <p style="font-size: 12px; color: #a0aec0; text-align: center; margin-top: 5px;">
-              * Note: Please remain in the group for the entire recruitment process.
+            <p style="font-size: 11.5px; color: #94a3b8; text-align: center; margin-top: 5px;">
+              * Make sure you remain in the group for the entire duration of the recruitment process.
             </p>
             
-            <p style="margin-top: 30px;">Regards,<br><strong>KARE IEEE Education Society Recruitment Cell</strong></p>
+            <p style="margin-top: 35px; border-t: 1px solid #f1f5f9; padding-top: 20px;">
+              Regards,<br>
+              <strong>KARE IEEE Education Society Recruitment Cell</strong>
+            </p>
           </div>
           <div class="footer">
             <div class="footer-logo">KARE IEEE EDUCATION SOCIETY</div>
-            <p style="margin: 5px 0 0 0;">Kalasalingam Academy of Research and Education</p>
-            <p style="margin: 5px 0 0 0;">For queries, contact us at <a href="mailto:education@kareieee.org">education@kareieee.org</a></p>
+            <p style="margin: 4px 0 0 0;">Kalasalingam Academy of Research and Education</p>
+            <p style="margin: 6px 0 0 0;">Questions? Contact us at <a href="mailto:ieeeeducation@klu.ac.in">ieeeeducation@klu.ac.in</a></p>
           </div>
         </div>
       </div>
@@ -232,10 +285,10 @@ export function getSubmissionEmailHtml(name) {
 }
 
 /**
- * Generates selection notification HTML (styled like an Appointment Order).
+ * Generates selection notification HTML (styled like a colourful, professional Appointment Order).
  */
-export function getSelectionEmailHtml({ name, role, dueDate }) {
-  const logoUrl = "https://education.ieee.org/wp-content/uploads/2018/09/IEEE_Education_Society_Logo_Color.png";
+export async function getSelectionEmailHtml({ name, role, dueDate }) {
+  const logoUrl = await getLogoUrl();
   const refNumber = `KARE-IEEE-EDS-${new Date().getFullYear()}-${Math.floor(1000 + Math.random() * 9000)}`;
   const currentDate = new Date().toLocaleDateString("en-IN", {
     day: "2-digit",
@@ -252,57 +305,67 @@ export function getSelectionEmailHtml({ name, role, dueDate }) {
       <title>Official Appointment Order</title>
       <style>
         body {
-          font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-          background-color: #f3f4f6;
+          font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+          background-color: #f1f5f9;
           margin: 0;
           padding: 0;
           -webkit-font-smoothing: antialiased;
         }
         .wrapper {
           width: 100%;
-          background-color: #f3f4f6;
+          background-color: #f1f5f9;
           padding: 40px 0;
         }
         .container {
           max-width: 650px;
           margin: 0 auto;
           background-color: #ffffff;
-          border-radius: 8px;
-          box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+          border-radius: 12px;
+          box-shadow: 0 15px 30px rgba(15, 23, 42, 0.08);
           overflow: hidden;
-          border: 1px solid #e5e7eb;
+          border: 1px solid #e2e8f0;
+          position: relative;
+        }
+        /* Colourful top frame */
+        .color-bar {
+          height: 6px;
+          background: linear-gradient(90deg, #0A192F 0%, #00629B 30%, #E77724 70%, #10B981 100%);
         }
         .header {
           background-color: #ffffff;
           padding: 35px 40px 15px 40px;
           text-align: center;
-          border-bottom: 2px dashed #e5e7eb;
+          border-bottom: 2px dashed #cbd5e1;
         }
         .header img {
-          max-height: 60px;
-          margin-bottom: 10px;
+          max-height: 65px;
+          margin-bottom: 12px;
+          background-color: #ffffff;
+          padding: 4px;
+          border-radius: 6px;
         }
         .society-title {
-          font-size: 16px;
+          font-size: 18px;
           font-weight: 800;
-          color: #0c1a30;
-          letter-spacing: 1px;
+          color: #0F172A;
+          letter-spacing: 1.5px;
           margin-bottom: 2px;
           text-transform: uppercase;
         }
         .society-subtitle {
-          font-size: 11px;
-          color: #4b5563;
+          font-size: 11.5px;
+          color: #475569;
           margin-bottom: 15px;
           letter-spacing: 0.5px;
+          font-weight: 600;
         }
         .order-meta {
           display: flex;
           justify-content: space-between;
-          font-size: 12px;
-          color: #4b5563;
-          font-family: monospace;
-          border-top: 1px solid #f3f4f6;
+          font-size: 11.5px;
+          color: #475569;
+          font-family: 'Courier New', Courier, monospace;
+          border-top: 1px solid #f1f5f9;
           padding-top: 12px;
           margin-top: 5px;
         }
@@ -314,44 +377,54 @@ export function getSelectionEmailHtml({ name, role, dueDate }) {
         }
         .content {
           padding: 40px;
-          color: #1f2937;
-          line-height: 1.6;
+          color: #334155;
+          line-height: 1.65;
         }
         .order-title {
           text-align: center;
-          font-size: 20px;
+          font-size: 21px;
           font-weight: 800;
           color: #00629B;
-          letter-spacing: 1.5px;
-          margin-bottom: 30px;
+          letter-spacing: 2px;
+          margin-bottom: 25px;
           text-transform: uppercase;
-          text-decoration: underline;
+          position: relative;
+        }
+        .order-title:after {
+          content: "";
+          display: block;
+          width: 80px;
+          height: 3px;
+          background-color: #E77724;
+          margin: 8px auto 0 auto;
+          border-radius: 2px;
         }
         .salutation {
-          font-size: 15px;
+          font-size: 16px;
           font-weight: 700;
           margin-bottom: 15px;
-          color: #111827;
+          color: #0F172A;
         }
         p {
           font-size: 14.5px;
-          color: #374151;
+          color: #334155;
           margin-bottom: 20px;
           text-align: justify;
         }
         .details-box {
-          background-color: #f9fafb;
-          border: 1px solid #e5e7eb;
-          border-radius: 6px;
-          padding: 20px 25px;
+          background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+          border: 1px dashed #cbd5e1;
+          border-radius: 8px;
+          padding: 22px 28px;
           margin: 30px 0;
+          box-shadow: inset 0 2px 4px rgba(0,0,0,0.01);
         }
         .details-row {
           display: flex;
           justify-content: space-between;
-          border-bottom: 1px solid #f3f4f6;
-          padding: 8px 0;
-          font-size: 13.5px;
+          border-bottom: 1px solid #e2e8f0;
+          padding: 10px 0;
+          font-size: 14px;
         }
         .details-row:last-child {
           border-bottom: none;
@@ -361,21 +434,25 @@ export function getSelectionEmailHtml({ name, role, dueDate }) {
           padding-top: 0;
         }
         .details-label {
-          color: #6b7280;
+          color: #64748b;
           font-weight: 600;
           flex-shrink: 0;
         }
         .details-value {
-          color: #111827;
+          color: #0F172A;
           font-weight: 700;
           text-align: right;
         }
         .due-date {
           color: #dc2626 !important;
+          background-color: #fee2e2;
+          padding: 2px 8px;
+          border-radius: 4px;
+          font-size: 13px;
         }
         .signatures {
           margin-top: 40px;
-          border-top: 1px solid #f3f4f6;
+          border-top: 1px solid #f1f5f9;
           padding-top: 30px;
           display: flex;
           justify-content: space-between;
@@ -387,32 +464,35 @@ export function getSelectionEmailHtml({ name, role, dueDate }) {
         .sig-line {
           width: 80%;
           margin: 0 auto 8px auto;
-          border-bottom: 1px solid #9ca3af;
+          border-bottom: 1.5px solid #94a3b8;
         }
         .sig-name {
           font-weight: 700;
-          font-size: 12.5px;
-          color: #111827;
+          font-size: 13px;
+          color: #0F172A;
         }
         .sig-title {
           font-size: 11px;
-          color: #6b7280;
+          color: #64748b;
+          font-weight: 550;
         }
         .footer {
-          background-color: #f9fafb;
+          background-color: #f8fafc;
           padding: 20px;
           text-align: center;
-          font-size: 11px;
-          color: #9ca3af;
-          border-top: 1px solid #f3f4f6;
+          font-size: 11.5px;
+          color: #94a3b8;
+          border-top: 1px solid #f1f5f9;
         }
       </style>
     </head>
     <body>
       <div class="wrapper">
         <div class="container">
+          <div class="color-bar"></div>
           <div class="header">
-            <img src="${logoUrl}" alt="IEEE Education Society Logo">
+            <!-- IEEE Education Society Logo -->
+            <img src="${logoUrl}" alt="KARE IEEE Education Society Logo">
             <div class="society-title">KARE IEEE Education Society</div>
             <div class="society-subtitle">Kalasalingam Academy of Research and Education, Krishnankoil</div>
             
@@ -442,7 +522,7 @@ export function getSelectionEmailHtml({ name, role, dueDate }) {
               </div>
               <div class="details-row">
                 <span class="details-label">Assigned Role/Domain:</span>
-                <span class="details-value" style="color: #00629B;">${role}</span>
+                <span class="details-value" style="color: #00629B; font-size: 14.5px;">${role}</span>
               </div>
               <div class="details-row">
                 <span class="details-label">Organization:</span>
@@ -462,12 +542,12 @@ export function getSelectionEmailHtml({ name, role, dueDate }) {
             
             <div class="signatures">
               <div class="sig-block">
-                <div class="sig-line" style="margin-top: 30px;"></div>
+                <div class="sig-line" style="margin-top: 35px;"></div>
                 <div class="sig-name">Executive Board</div>
                 <div class="sig-title">IEEE Student Branch Coord.</div>
               </div>
               <div class="sig-block">
-                <div class="sig-line" style="margin-top: 30px;"></div>
+                <div class="sig-line" style="margin-top: 35px;"></div>
                 <div class="sig-name">Faculty Advisor</div>
                 <div class="sig-title">KARE IEEE Education Society</div>
               </div>

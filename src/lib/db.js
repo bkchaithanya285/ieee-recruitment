@@ -73,7 +73,7 @@ export async function submitApplicant(data) {
       to: payload.email,
       toName: payload.name,
       subject: "Application Submitted Successfully - KARE IEEE Education Society",
-      htmlContent: getSubmissionEmailHtml(payload.name)
+      htmlContent: await getSubmissionEmailHtml(payload.name)
     });
   } catch (emailError) {
     console.error("Failed to send submission email:", emailError);
@@ -160,7 +160,7 @@ export async function approveApplicantWithRole(id, role, dueDate) {
         to: appData.email,
         toName: appData.name,
         subject: `Appointment Order: Selection for ${role} - KARE IEEE Education Society`,
-        htmlContent: getSelectionEmailHtml({
+        htmlContent: await getSelectionEmailHtml({
           name: appData.name,
           role: role,
           dueDate: dueDate
