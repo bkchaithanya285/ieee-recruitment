@@ -27,6 +27,23 @@ async function getLogoUrl() {
 }
 
 /**
+ * Dynamically resolves the absolute signature URL depending on the environment.
+ */
+async function getSigUrl() {
+  try {
+    const headersList = await headers();
+    const host = headersList.get("host");
+    if (host) {
+      const protocol = host.includes("localhost") || host.includes("127.0.0.1") ? "http" : "https";
+      return `${protocol}://${host}/signature.jpg`;
+    }
+  } catch (error) {
+    // Suppress error
+  }
+  return "https://ieee-recruitment-c1870.vercel.app/signature.jpg";
+}
+
+/**
  * Sends an email using Brevo's SMTP API.
  * 
  * @param {object} params
@@ -221,6 +238,7 @@ export async function getSubmissionEmailHtml(name) {
  */
 export async function getSelectionEmailHtml({ name, role, dueDate }) {
   const logoUrl = await getLogoUrl();
+  const sigUrl = await getSigUrl();
   const refNumber = `KARE-IEEE-EDS-${new Date().getFullYear()}-${Math.floor(1000 + Math.random() * 9000)}`;
   const currentDate = new Date().toLocaleDateString("en-IN", {
     day: "2-digit",
@@ -371,6 +389,10 @@ export async function getSelectionEmailHtml({ name, role, dueDate }) {
                         <table width="280" cellpadding="0" cellspacing="0" border="0" style="text-align: center;">
                           <tr>
                             <td align="center">
+                              <!-- Signature Image -->
+                              <div style="margin-bottom: 5px;">
+                                <img src="${sigUrl}" alt="Signature" style="max-height: 50px; display: inline-block;">
+                              </div>
                               <div style="width: 220px; border-bottom: 1.5px solid #94a3b8; margin-bottom: 8px;">&nbsp;</div>
                               <div style="font-weight: 700; font-size: 13px; color: #0F172A; margin-bottom: 2px;">Dr. P. Chinnasamy</div>
                               <div style="font-size: 11.5px; color: #64748b; font-weight: 600; text-transform: uppercase; margin-bottom: 2px;">SBC COUNSELLOR</div>

@@ -20,6 +20,7 @@ import {
 } from "react-icons/fa";
 import { updateApplicantStatus, deleteApplicant, approveApplicantWithRole } from "@/lib/db";
 import { useToast } from "@/context/ToastContext";
+import { jsPDF } from "jspdf";
 
 const DEPT_OPTIONS = ["CSE", "ECE", "OTHER"];
 const YEAR_OPTIONS = ["2nd Year", "3rd Year"];
@@ -258,6 +259,196 @@ KARE IEEE EDUCATION SOCIETY`;
     addToast("Redirecting to WhatsApp chat...", "info");
   };
 
+  const handleDownloadLetter = async (app) => {
+    try {
+      addToast("Generating PDF Letter...", "info");
+      
+      const doc = new jsPDF({
+        orientation: "portrait",
+        unit: "mm",
+        format: "a4"
+      });
+
+      const pageWidth = doc.internal.pageSize.width;
+      const pageHeight = doc.internal.pageSize.height;
+
+      // Draw a gold/blue double border frame
+      doc.setDrawColor(0, 98, 155); // IEEE Blue
+      doc.setLineWidth(1);
+      doc.rect(8, 8, pageWidth - 16, pageHeight - 16);
+      doc.setDrawColor(231, 119, 36); // IEEE Orange
+      doc.setLineWidth(0.5);
+      doc.rect(9.5, 9.5, pageWidth - 19, pageHeight - 19);
+
+      // Add Header Logo
+      try {
+        const logoUrl = "/logo.jpg";
+        const logoBase64 = await new Promise((resolve, reject) => {
+          const img = new Image();
+          img.crossOrigin = "anonymous";
+          img.onload = () => {
+            const canvas = document.createElement("canvas");
+            canvas.width = img.width;
+            canvas.height = img.height;
+            const ctx = canvas.getContext("2d");
+            ctx.drawImage(img, 0, 0);
+            resolve(canvas.toDataURL("image/jpeg"));
+          };
+          img.onerror = (e) => reject(e);
+          img.src = logoUrl;
+        });
+        doc.addImage(logoBase64, "JPEG", (pageWidth - 35) / 2, 15, 35, 25);
+      } catch (err) {
+        console.error("Failed to add logo to PDF:", err);
+      }
+
+      // Title & Subtitle
+      doc.setTextColor(15, 23, 42);
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(16);
+      doc.text("KARE IEEE EDUCATION SOCIETY", pageWidth / 2, 48, { align: "center" });
+
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(9);
+      doc.setTextColor(100, 116, 139);
+      doc.text("Kalasalingam Academy of Research and Education, Krishnankoil", pageWidth / 2, 53, { align: "center" });
+
+      // Divider line
+      doc.setDrawColor(226, 232, 240);
+      doc.setLineWidth(0.5);
+      doc.line(15, 58, pageWidth - 15, 58);
+
+      // Metadata: Ref No & Date
+      doc.setFont("courier", "bold");
+      doc.setFontSize(10);
+      doc.setTextColor(71, 85, 105);
+      const refNumber = `REF: KARE-IEEE-EDS-${new Date(app.timestamp || Date.now()).getFullYear()}-${app.registrationNumber.substring(app.registrationNumber.length - 4)}`;
+      const currentDate = new Date().toLocaleDateString("en-IN", {
+        day: "2-digit",
+        month: "long",
+        year: "numeric"
+      });
+      doc.text(refNumber, 15, 66);
+      doc.text(`DATE: ${currentDate}`, pageWidth - 15, 66, { align: "right" });
+
+      // Divider line
+      doc.line(15, 70, pageWidth - 15, 70);
+
+      // Document Title
+      doc.setTextColor(0, 98, 155);
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(16);
+      doc.text("OFFICIAL APPOINTMENT ORDER", pageWidth / 2, 82, { align: "center" });
+
+      // Salutation
+      doc.setTextColor(15, 23, 42);
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(11);
+      doc.text(`Dear ${app.name},`, 15, 96);
+
+      // Body copy
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(10.5);
+      doc.setTextColor(51, 65, 85);
+      const body1 = "Based on your performance in the recruitment interviews and evaluations held by the Executive Board, we are pleased to inform you that you have been selected to join the core team of KARE IEEE Education Society for the academic year 2026-2027.";
+      const body2 = "You are hereby appointed to the following position with immediate effect, subject to your formal confirmation:";
+
+      const splitBody1 = doc.splitTextToSize(body1, pageWidth - 30);
+      doc.text(splitBody1, 15, 103, { align: "justify" });
+      
+      const splitBody2 = doc.splitTextToSize(body2, pageWidth - 30);
+      doc.text(splitBody2, 15, 122, { align: "justify" });
+
+      // Key details box
+      doc.setFillColor(248, 250, 252);
+      doc.rect(15, 132, pageWidth - 30, 42, "F");
+      doc.setDrawColor(203, 213, 225);
+      doc.setLineWidth(0.3);
+      doc.rect(15, 132, pageWidth - 30, 42);
+
+      doc.setFont("helvetica", "bold");
+      doc.setTextColor(100, 116, 139);
+      doc.text("Appointee Name:", 20, 140);
+      doc.text("Assigned Role/Domain:", 20, 149);
+      doc.text("Organization:", 20, 158);
+      doc.text("Confirmation Due Date:", 20, 167);
+
+      doc.setTextColor(15, 23, 42);
+      doc.text(app.name, pageWidth - 20, 140, { align: "right" });
+      doc.setTextColor(0, 98, 155);
+      doc.text(app.approvedRole || app.priority1 || "Core Member", pageWidth - 20, 149, { align: "right" });
+      doc.setTextColor(15, 23, 42);
+      doc.text("KARE IEEE Education Society", pageWidth - 20, 158, { align: "right" });
+      doc.setTextColor(220, 38, 38); // Red
+      doc.text(app.dueDate || "As per schedule", pageWidth - 20, 167, { align: "right" });
+
+      // Core team expectations
+      doc.setFont("helvetica", "normal");
+      doc.setTextColor(51, 65, 85);
+      const body3 = "As a core committee member, you will be expected to work collaboratively with your team members, demonstrate leadership quality, and actively contribute to the workshops, technical events, and initiatives organized by the chapter.";
+      const body4 = "Please note that onboarding details and task assignments will be coordinated through our WhatsApp group. Ensure that you have accepted this appointment and confirmed your onboarding details by the due date mentioned above.";
+      const body5 = "Congratulations once again! We look forward to an outstanding tenure working together to drive academic and technical excellence.";
+
+      const splitBody3 = doc.splitTextToSize(body3, pageWidth - 30);
+      doc.text(splitBody3, 15, 184, { align: "justify" });
+      const splitBody4 = doc.splitTextToSize(body4, pageWidth - 30);
+      doc.text(splitBody4, 15, 202, { align: "justify" });
+      const splitBody5 = doc.splitTextToSize(body5, pageWidth - 30);
+      doc.text(splitBody5, 15, 222, { align: "justify" });
+
+      // Regards text
+      doc.setFont("helvetica", "bold");
+      doc.setTextColor(15, 23, 42);
+      doc.text("Regards,", 15, 238);
+      doc.setTextColor(0, 98, 155);
+      doc.text("KARE IEEE Education Society", 15, 243);
+
+      // Signature line & image
+      try {
+        const sigUrl = "/signature.jpg";
+        const sigBase64 = await new Promise((resolve, reject) => {
+          const img = new Image();
+          img.crossOrigin = "anonymous";
+          img.onload = () => {
+            const canvas = document.createElement("canvas");
+            canvas.width = img.width;
+            canvas.height = img.height;
+            const ctx = canvas.getContext("2d");
+            ctx.drawImage(img, 0, 0);
+            resolve(canvas.toDataURL("image/jpeg"));
+          };
+          img.onerror = (e) => reject(e);
+          img.src = sigUrl;
+        });
+        doc.addImage(sigBase64, "JPEG", (pageWidth - 30) / 2, 252, 30, 15);
+      } catch (err) {
+        console.error("Failed to add signature to PDF:", err);
+      }
+
+      // Signature metadata
+      doc.setDrawColor(148, 163, 184);
+      doc.setLineWidth(0.5);
+      doc.line((pageWidth - 60) / 2, 270, (pageWidth + 60) / 2, 270);
+
+      doc.setTextColor(15, 23, 42);
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(9.5);
+      doc.text("Dr. P. Chinnasamy", pageWidth / 2, 274, { align: "center" });
+
+      doc.setTextColor(100, 116, 139);
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(8.5);
+      doc.text("SBC COUNSELLOR", pageWidth / 2, 278, { align: "center" });
+      doc.text("KARE IEEE Education Society", pageWidth / 2, 282, { align: "center" });
+
+      doc.save(`Appointment_Order_${app.name.replace(/\s+/g, "_")}.pdf`);
+      addToast("Appointment Order downloaded successfully!", "success");
+    } catch (error) {
+      console.error("PDF generation error:", error);
+      addToast("Failed to generate PDF.", "error");
+    }
+  };
+
   const toggleSort = (field) => {
     if (sortBy === field) {
       setSortOrder(prev => (prev === "asc" ? "desc" : "asc"));
@@ -487,6 +678,17 @@ KARE IEEE EDUCATION SOCIETY`;
                         </button>
                       )}
 
+                      {/* Download PDF Letter for approved candidate */}
+                      {app.status === "approved" && (
+                        <button
+                          onClick={() => handleDownloadLetter(app)}
+                          className="p-2 rounded-lg bg-blue-900/20 border border-blue-500/20 text-blue-400 hover:bg-blue-700 hover:text-white transition-all"
+                          title="Download Appointment Letter"
+                        >
+                          <FaFileAlt size={12} />
+                        </button>
+                      )}
+
                       {/* Delete */}
                       <button
                         onClick={() => setDeleteConfirmId(app.id)}
@@ -632,6 +834,16 @@ KARE IEEE EDUCATION SOCIETY`;
                   <FaWhatsapp size={14} />
                   <span>Send Greeting</span>
                 </button>
+
+                {selectedApplicant.status === "approved" && (
+                  <button
+                    onClick={() => handleDownloadLetter(selectedApplicant)}
+                    className="py-2.5 px-4 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs flex items-center space-x-2 transition-all cursor-pointer border border-blue-500/25"
+                  >
+                    <FaFileAlt size={14} />
+                    <span>Download Letter</span>
+                  </button>
+                )}
 
                 {selectedApplicant.status !== "approved" && (
                   <button
