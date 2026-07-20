@@ -866,7 +866,7 @@ KARE IEEE EDUCATION SOCIETY`;
                   className="py-2.5 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs flex items-center space-x-2 transition-all cursor-pointer"
                 >
                   <FaWhatsapp size={14} />
-                  <span>Send Greeting</span>
+                  <span>{selectedApplicant.status === "approved" ? "Send WhatsApp Selection" : "Send Greeting"}</span>
                 </button>
 
                 {selectedApplicant.status === "approved" && (
