@@ -196,7 +196,7 @@ export default function Hero() {
             onClick={(e) => handleScrollTo(e, "#apply")}
             className="bg-gradient-blue text-white px-8 py-4 rounded-full font-bold text-base transition-all duration-300 hover:shadow-[0_0_25px_rgba(0,180,255,0.5)] hover:-translate-y-1 text-center shadow-md border border-ieee-accent/20"
           >
-            Join Us
+            Recruitment Completed
           </a>
           <a
             href="#about"

@@ -212,7 +212,7 @@ export default function StatusChecker() {
                         </p>
                         
                         <p>
-                          Please note that onboarding details and task assignments will be coordinated through our WhatsApp group.
+                          Please note that onboarding details and task assignments will be coordinated through our WhatsApp group. You can join the group here: <a href="https://chat.whatsapp.com/GX5NLg4wH89H3ksuMwJQ1N" target="_blank" className="text-[#00629B] hover:underline font-bold">Join Onboarding WhatsApp Group</a>.
                         </p>
                         
                         <p>

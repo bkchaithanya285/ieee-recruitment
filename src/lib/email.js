@@ -383,7 +383,16 @@ export async function getSelectionEmailHtml({ id, name, role }) {
                   
                   <p style="font-size: 15px; color: #334155; margin: 0 0 22px 0; text-align: justify; line-height: 1.7;">As a core committee member, you will be expected to work collaboratively with your team members, demonstrate leadership quality, and actively contribute to the workshops, technical events, and initiatives organized by the chapter.</p>
                   
-                  <p style="font-size: 15px; color: #334155; margin: 0 0 22px 0; text-align: justify; line-height: 1.7;">Please note that onboarding details and task assignments will be coordinated through our WhatsApp group.</p>
+                  <p style="font-size: 15px; color: #334155; margin: 0 0 22px 0; text-align: justify; line-height: 1.7;">Please note that onboarding details and task assignments will be coordinated through our official WhatsApp group. Please click the button below to join the group immediately:</p>
+                  
+                  <!-- Onboarding WhatsApp Group CTA Button -->
+                  <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin: 25px 0 25px 0;">
+                    <tr>
+                      <td align="center">
+                        <a href="https://chat.whatsapp.com/GX5NLg4wH89H3ksuMwJQ1N" target="_blank" style="display: inline-block; background-color: #25D366; color: #ffffff !important; text-decoration: none; padding: 15px 36px; font-size: 14px; font-weight: 800; border-radius: 30px; text-transform: uppercase; letter-spacing: 1.2px; box-shadow: 0 6px 20px rgba(37, 211, 102, 0.35);">Join Onboarding WhatsApp Group</a>
+                      </td>
+                    </tr>
+                  </table>
                   
                   <p style="font-size: 15px; color: #334155; margin: 0 0 22px 0; text-align: justify; line-height: 1.7;">Congratulations once again! We look forward to an outstanding tenure working together to drive academic and technical excellence.</p>
                   

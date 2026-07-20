@@ -181,11 +181,21 @@ export default function ApplicantTable({ applicants, onFilteredChange, refreshDa
       }
 
       if (sendWhatsapp) {
+        const downloadLink = `${window.location.origin}/api/download-letter?id=${approvalModalData.id}`;
         const rawMessage = `Hello ${approvalModalData.name} 👋,
 
 Congratulations! You have been selected for the role of *${approvedRole}* in the *KARE IEEE Education Society*.
 
-We look forward to working with you!`;
+Please join our official WhatsApp group for further onboarding updates:
+https://chat.whatsapp.com/GX5NLg4wH89H3ksuMwJQ1N
+
+You can download your official Appointment Order PDF here:
+${downloadLink}
+
+We look forward to working with you!
+
+Regards,
+KARE IEEE EDUCATION SOCIETY`;
         const encodedMessage = encodeURIComponent(rawMessage);
         const link = `https://wa.me/91${approvalModalData.phone}?text=${encodedMessage}`;
         window.open(link, "_blank");
@@ -225,7 +235,25 @@ We look forward to working with you!`;
   };
 
   const handleSendWhatsApp = (app) => {
-    const rawMessage = `Hello ${app.name} 👋
+    let rawMessage = "";
+    if (app.status === "approved") {
+      const downloadLink = `${window.location.origin}/api/download-letter?id=${app.id}`;
+      rawMessage = `Hello ${app.name} 👋,
+
+Congratulations! You have been selected for the role of *${app.approvedRole || app.priority1 || "Core Member"}* in the *KARE IEEE Education Society*.
+
+Please join our official WhatsApp group for further onboarding updates:
+https://chat.whatsapp.com/GX5NLg4wH89H3ksuMwJQ1N
+
+You can download your official Appointment Order PDF here:
+${downloadLink}
+
+We look forward to working with you!
+
+Regards,
+KARE IEEE EDUCATION SOCIETY`;
+    } else {
+      rawMessage = `Hello ${app.name} 👋
 
 Welcome to *KARE IEEE EDUCATION SOCIETY*.
 
@@ -238,6 +266,7 @@ https://chat.whatsapp.com/LEVdBbZvnnEI3Flh1SKX6Y?s=cl&p=a&ilr=0
 
 Regards,
 KARE IEEE EDUCATION SOCIETY`;
+    }
 
     const encodedMessage = encodeURIComponent(rawMessage);
     const link = `https://wa.me/91${app.phone}?text=${encodedMessage}`;
@@ -568,7 +597,7 @@ KARE IEEE EDUCATION SOCIETY`;
                 </th>
                 <th className="py-4 px-4">Class (Yr / Dept / Sec)</th>
                 <th className="py-4 px-4">Contact</th>
-                <th className="py-4 px-4">Priority 1 Choice</th>
+                <th className="py-4 px-4">Appointed / Priority 1 Role</th>
                 <th className="py-4 px-4 text-center">Status</th>
                 <th className="py-4 px-6 text-right cursor-pointer hover:text-white" onClick={() => toggleSort("timestamp")}>
                   <div className="flex items-center justify-end gap-1.5">
@@ -606,8 +635,12 @@ KARE IEEE EDUCATION SOCIETY`;
                   </td>
 
                   {/* Priority 1 */}
-                  <td className="py-4 px-4 font-bold text-white tracking-wide">
-                    {app.priority1}
+                  <td className="py-4 px-4 font-semibold">
+                    {app.status === "approved" ? (
+                      <span className="text-emerald-400 font-bold">{app.approvedRole || "Core Member"}</span>
+                    ) : (
+                      <span className="text-slate-300">{app.priority1}</span>
+                    )}
                   </td>
 
                   {/* Status Badge */}
@@ -649,13 +682,13 @@ KARE IEEE EDUCATION SOCIETY`;
                         <FaWhatsapp size={12} />
                       </button>
 
-                      {/* Approve */}
-                      {app.status !== "approved" && (
+                      {/* Approve / Change Role */}
+                      {app.status !== "rejected" && (
                         <button
                           onClick={() => handleStatusChange(app.id, "approved")}
                           disabled={actionLoading}
                           className="p-2 rounded-lg bg-emerald-900/20 border border-emerald-500/20 text-emerald-400 hover:bg-emerald-700 hover:text-white transition-all"
-                          title="Approve Candidate"
+                          title={app.status === "approved" ? "Change Role / Re-Approve" : "Approve Candidate"}
                         >
                           <FaCheck size={12} />
                         </button>
@@ -770,6 +803,12 @@ KARE IEEE EDUCATION SOCIETY`;
                 <span className="text-slate-500 text-[10px] uppercase font-bold tracking-wider">Contact Phone</span>
                 <p className="text-white font-semibold">{selectedApplicant.phone}</p>
               </div>
+              {selectedApplicant.status === "approved" && (
+                <div className="bg-emerald-950/20 border border-emerald-500/20 p-4 rounded-xl space-y-1">
+                  <span className="text-emerald-400 text-[10px] uppercase font-bold tracking-wider">Appointed Role</span>
+                  <p className="text-white font-bold">{selectedApplicant.approvedRole || "Core Member"}</p>
+                </div>
+              )}
               <div className="bg-white/2 border border-white/5 p-4 rounded-xl space-y-1">
                 <span className="text-slate-500 text-[10px] uppercase font-bold tracking-wider">Email Address</span>
                 <p className="text-white font-semibold truncate">{selectedApplicant.email}</p>
@@ -840,13 +879,13 @@ KARE IEEE EDUCATION SOCIETY`;
                   </button>
                 )}
 
-                {selectedApplicant.status !== "approved" && (
+                {selectedApplicant.status !== "rejected" && (
                   <button
                     onClick={() => handleStatusChange(selectedApplicant.id, "approved")}
                     disabled={actionLoading}
                     className="py-2.5 px-4 rounded-xl bg-emerald-600/15 hover:bg-emerald-600 border border-emerald-500/25 text-emerald-400 hover:text-white font-bold text-xs transition-all cursor-pointer"
                   >
-                    <span>Approve</span>
+                    <span>{selectedApplicant.status === "approved" ? "Update Role" : "Approve"}</span>
                   </button>
                 )}
 
@@ -1082,7 +1121,16 @@ KARE IEEE EDUCATION SOCIETY`;
 
 Congratulations! You have been selected for the role of *${approvedRole}* in the *KARE IEEE Education Society*.
 
-We look forward to working with you!`}
+Please join our official WhatsApp group for further onboarding updates:
+https://chat.whatsapp.com/GX5NLg4wH89H3ksuMwJQ1N
+
+You can download your official Appointment Order PDF here:
+${window.location.origin}/api/download-letter?id=${approvalModalData.id}
+
+We look forward to working with you!
+
+Regards,
+KARE IEEE EDUCATION SOCIETY`}
                         </div>
                         <div className="self-end text-[9px] text-slate-500 pr-1 select-none">
                           Delivered • Message ready to send

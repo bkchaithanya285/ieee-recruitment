@@ -106,7 +106,7 @@ export default function Navbar() {
               onClick={(e) => handleScrollTo(e, "/#apply")}
               className="bg-ieee-blue hover:bg-ieee-light text-white px-6 py-2.5 rounded-full text-sm font-semibold transition-all duration-300 hover:shadow-[0_0_15px_rgba(0,180,255,0.4)] hover:-translate-y-0.5 border border-ieee-accent/25"
             >
-              Apply Now
+              Recruitment Completed
             </Link>
           </div>
 
@@ -145,7 +145,7 @@ export default function Navbar() {
             onClick={(e) => handleScrollTo(e, "/#apply")}
             className="w-full max-w-xs text-center bg-ieee-blue hover:bg-ieee-light text-white px-6 py-3 rounded-full text-base font-semibold transition-all duration-200 border border-ieee-accent/25"
           >
-            Apply Now
+            Recruitment Completed
           </Link>
         </div>
       </div>

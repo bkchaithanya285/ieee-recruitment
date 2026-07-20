@@ -107,7 +107,7 @@ export default function Footer() {
                 onClick={(e) => handleScrollTo(e, "#apply")}
                 className="text-slate-400 hover:text-white text-sm transition-colors duration-200"
               >
-                Apply Now
+                Recruitment Completed
               </a>
               <a
                 href="#contact"

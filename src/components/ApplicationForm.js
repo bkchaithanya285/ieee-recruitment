@@ -7,6 +7,7 @@ import { Reorder, motion } from "framer-motion";
 import { FaWhatsapp, FaExclamationTriangle, FaListOl, FaSpinner, FaCheckCircle, FaUserCheck } from "react-icons/fa";
 import { useToast } from "@/context/ToastContext";
 import { checkRegistrationExists, checkEmailExists, submitApplicant } from "@/lib/db";
+import Link from "next/link";
 
 const ROLE_OPTIONS = [
   { value: "Web Development Team", label: "Web Development Team" },
@@ -311,307 +312,34 @@ export default function ApplicationForm() {
             Join Our Community
           </h2>
           <h3 className="text-3xl sm:text-5xl font-extrabold text-white mb-6">
-            Application Form
+            Recruitment Completed
           </h3>
           <p className="text-slate-300 text-base sm:text-lg">
-            Please fill out all the fields below carefully. Choose your desired teams and rank them in order of your preference.
+            Thank you for your interest! The recruitment process for this academic session has been completed.
           </p>
         </div>
 
-        {/* Application Form Box */}
-        <div className="glass-panel p-8 sm:p-10 hover:border-ieee-blue/20" data-aos="fade-up" data-aos-delay="100">
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-            
-            {/* Fields Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              
-              {/* Full Name */}
-              <div className="flex flex-col">
-                <label className="text-slate-300 font-semibold text-xs tracking-wider uppercase mb-2">
-                  Full Name <span className="text-red-500">*</span>
-                </label>
-                <input
-                  type="text"
-                  placeholder="Enter your full name"
-                  className={`bg-white/3 border px-4 py-3 rounded-xl text-white placeholder-white/20 text-sm focus:outline-none focus:border-ieee-accent focus:ring-2 focus:ring-ieee-accent/20 transition-all ${
-                    errors.name ? "border-rose-500/50" : "border-white/8"
-                  }`}
-                  {...register("name", { required: "Name is required" })}
-                />
-                {errors.name && <span className="text-rose-400 text-xs mt-1.5 font-semibold">{errors.name.message}</span>}
-              </div>
+        {/* Beautiful glass panel showing Recruitment Process Completed */}
+        <div className="glass-panel p-8 sm:p-12 border-ieee-blue/20 bg-slate-900/50 shadow-[0_0_50px_rgba(0,180,255,0.1)] rounded-2xl text-center max-w-2xl mx-auto relative overflow-hidden" data-aos="fade-up" data-aos-delay="100">
+          <div className="w-20 h-20 bg-gradient-to-tr from-ieee-blue/20 to-ieee-accent/10 text-ieee-accent rounded-2xl flex items-center justify-center mx-auto mb-8 border border-ieee-blue/20 shadow-[0_0_30px_rgba(0,180,255,0.2)]">
+            <FaUserCheck size={36} />
+          </div>
 
-              {/* Registration Number */}
-              <div className="flex flex-col">
-                <label className="text-slate-300 font-semibold text-xs tracking-wider uppercase mb-2">
-                  Registration Number <span className="text-red-500">*</span>
-                </label>
-                <input
-                  type="text"
-                  placeholder="e.g. 9919004001"
-                  className={`bg-white/3 border px-4 py-3 rounded-xl text-white placeholder-white/20 text-sm focus:outline-none focus:border-ieee-accent focus:ring-2 focus:ring-ieee-accent/20 transition-all ${
-                    errors.registrationNumber ? "border-rose-500/50" : "border-white/8"
-                  }`}
-                  {...register("registrationNumber", { required: "Registration Number is required" })}
-                />
-                {errors.registrationNumber && <span className="text-rose-400 text-xs mt-1.5 font-semibold">{errors.registrationNumber.message}</span>}
-              </div>
+          <h4 className="text-2xl sm:text-3xl font-extrabold text-white mb-4 tracking-wide">
+            Recruitment Closed
+          </h4>
+          <p className="text-slate-300 text-sm sm:text-base leading-relaxed mb-8">
+            The registration window is now closed. We have successfully completed our recruitment drive for the 2026-2027 academic year. 
+          </p>
 
-              {/* Year */}
-              <div className="flex flex-col">
-                <label className="text-slate-300 font-semibold text-xs tracking-wider uppercase mb-2">
-                  Year <span className="text-red-500">*</span>
-                </label>
-                <Controller
-                  name="year"
-                  control={control}
-                  rules={{ required: "Year is required" }}
-                  render={({ field }) => (
-                    isMounted ? (
-                      <Select
-                        {...field}
-                        instanceId="year-select"
-                        options={YEAR_OPTIONS}
-                        placeholder="Select your year"
-                        styles={customSelectStyles}
-                        isSearchable={false}
-                      />
-                    ) : (
-                      <div className="w-full h-[42px] bg-white/3 border border-white/8 rounded-xl animate-pulse" />
-                    )
-                  )}
-                />
-                {errors.year && <span className="text-rose-400 text-xs mt-1.5 font-semibold">{errors.year.message}</span>}
-              </div>
-
-              {/* Department */}
-              <div className="flex flex-col">
-                <label className="text-slate-300 font-semibold text-xs tracking-wider uppercase mb-2">
-                  Department <span className="text-red-500">*</span>
-                </label>
-                <Controller
-                  name="department"
-                  control={control}
-                  rules={{ required: "Department is required" }}
-                  render={({ field }) => (
-                    isMounted ? (
-                      <Select
-                        {...field}
-                        instanceId="department-select"
-                        options={DEPT_OPTIONS}
-                        placeholder="Select your department"
-                        styles={customSelectStyles}
-                        isSearchable={false}
-                      />
-                    ) : (
-                      <div className="w-full h-[42px] bg-white/3 border border-white/8 rounded-xl animate-pulse" />
-                    )
-                  )}
-                />
-                {errors.department && <span className="text-rose-400 text-xs mt-1.5 font-semibold">{errors.department.message}</span>}
-              </div>
-
-              {/* Section */}
-              <div className="flex flex-col">
-                <label className="text-slate-300 font-semibold text-xs tracking-wider uppercase mb-2">
-                  Section <span className="text-red-500">*</span>
-                </label>
-                <input
-                  type="text"
-                  placeholder="e.g. A or B"
-                  className={`bg-white/3 border px-4 py-3 rounded-xl text-white placeholder-white/20 text-sm focus:outline-none focus:border-ieee-accent focus:ring-2 focus:ring-ieee-accent/20 transition-all ${
-                    errors.section ? "border-rose-500/50" : "border-white/8"
-                  }`}
-                  {...register("section", { required: "Section is required" })}
-                />
-                {errors.section && <span className="text-rose-400 text-xs mt-1.5 font-semibold">{errors.section.message}</span>}
-              </div>
-
-              {/* Email */}
-              <div className="flex flex-col">
-                <label className="text-slate-300 font-semibold text-xs tracking-wider uppercase mb-2">
-                  Email ID <span className="text-red-500">*</span>
-                </label>
-                <input
-                  type="email"
-                  placeholder="yourname@gmail.com"
-                  className={`bg-white/3 border px-4 py-3 rounded-xl text-white placeholder-white/20 text-sm focus:outline-none focus:border-ieee-accent focus:ring-2 focus:ring-ieee-accent/20 transition-all ${
-                    errors.email ? "border-rose-500/50" : "border-white/8"
-                  }`}
-                  {...register("email", {
-                    required: "Email is required",
-                    pattern: {
-                      value: /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/,
-                      message: "Invalid email format"
-                    }
-                  })}
-                />
-                {errors.email && <span className="text-rose-400 text-xs mt-1.5 font-semibold">{errors.email.message}</span>}
-              </div>
-
-              {/* WhatsApp Phone Number */}
-              <div className="flex flex-col md:col-span-2">
-                <label className="text-slate-300 font-semibold text-xs tracking-wider uppercase mb-2">
-                  WhatsApp Phone Number <span className="text-red-500">*</span>
-                </label>
-                <input
-                  type="tel"
-                  placeholder="10-digit WhatsApp number"
-                  className={`bg-white/3 border px-4 py-3 rounded-xl text-white placeholder-white/20 text-sm focus:outline-none focus:border-ieee-accent focus:ring-2 focus:ring-ieee-accent/20 transition-all ${
-                    errors.phone ? "border-rose-500/50" : "border-white/8"
-                  }`}
-                  {...register("phone", {
-                    required: "Phone number is required",
-                    pattern: {
-                      value: /^[0-9]{10}$/,
-                      message: "Phone number must be exactly 10 digits"
-                    }
-                  })}
-                />
-                {errors.phone && <span className="text-rose-400 text-xs mt-1.5 font-semibold">{errors.phone.message}</span>}
-              </div>
-
-            </div>
-
-            {/* Role Preference Selector */}
-            <div className="flex flex-col border-t border-white/5 pt-6">
-              <label className="text-slate-300 font-semibold text-xs tracking-wider uppercase mb-1">
-                Role Preferences (Select up to 3) <span className="text-red-500">*</span>
-              </label>
-              <p className="text-slate-400 text-xs mb-3">
-                Select your preferred teams. You can choose a maximum of three domains.
-              </p>
-              {isMounted ? (
-                <Select
-                  instanceId="roles-select"
-                  isMulti
-                  options={ROLE_OPTIONS}
-                  value={selectedRoles}
-                  onChange={(selected) => {
-                    if (selected && selected.length > 3) {
-                      addToast("You can select a maximum of 3 roles.", "warning");
-                      return;
-                    }
-                    setSelectedRoles(selected || []);
-                  }}
-                  placeholder="Choose preferred roles..."
-                  styles={customSelectStyles}
-                  closeMenuOnSelect={false}
-                />
-              ) : (
-                <div className="w-full h-[42px] bg-white/3 border border-white/8 rounded-xl animate-pulse" />
-              )}
-            </div>
-
-            {/* Drag & Drop Reordering */}
-            {priorities.length > 0 && (
-              <motion.div 
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="flex flex-col border border-white/5 rounded-2xl p-6 bg-white/2"
-              >
-                <label className="text-slate-300 font-semibold text-xs tracking-wider uppercase mb-1 flex items-center space-x-2">
-                  <FaListOl className="text-ieee-accent" />
-                  <span>Prioritize Selected Roles (Drag to Reorder)</span>
-                </label>
-                <p className="text-slate-400 text-xs mb-4">
-                  Drag the cards up or down to set your priority order. Top card represents your highest priority choice.
-                </p>
-                
-                {/* Reorder Group */}
-                <Reorder.Group
-                  axis="y"
-                  values={priorities}
-                  onReorder={setPriorities}
-                  className="space-y-3 cursor-grab"
-                >
-                  {priorities.map((role, idx) => (
-                    <Reorder.Item
-                      key={role}
-                      value={role}
-                      className="glass-panel p-4 flex items-center justify-between border-white/8 hover:border-ieee-accent/30 bg-[#0A192F]/60 select-none active:cursor-grabbing"
-                    >
-                      <div className="flex items-center space-x-3">
-                        <span className="w-6 h-6 rounded-full bg-ieee-blue/20 text-ieee-accent font-bold text-xs flex items-center justify-center border border-ieee-blue/30">
-                          {idx + 1}
-                        </span>
-                        <span className="text-white text-sm font-semibold tracking-wide">
-                          {role}
-                        </span>
-                      </div>
-                      <div className="text-slate-500 text-xs">
-                        Priority {idx + 1}
-                      </div>
-                    </Reorder.Item>
-                  ))}
-                </Reorder.Group>
-              </motion.div>
-            )}
-
-            {/* WhatsApp Verification Gate */}
-            <div className="border-t border-white/5 pt-6 space-y-4">
-              <div className="flex items-start space-x-3 p-4 rounded-xl border border-amber-500/20 bg-amber-500/5">
-                <FaExclamationTriangle className="text-amber-500 shrink-0 mt-0.5" size={18} />
-                <div className="text-sm">
-                  <h5 className="font-bold text-amber-300 leading-tight mb-1">
-                    WhatsApp Group Joining is Mandatory
-                  </h5>
-                  <p className="text-slate-300 text-xs leading-relaxed">
-                    You must join our official WhatsApp Group before submitting your application. This is where all recruitment updates and schedules will be announced.
-                  </p>
-                </div>
-              </div>
-
-              <div className="flex flex-col sm:flex-row items-center justify-between gap-4 bg-white/2 border border-white/5 p-4 rounded-xl">
-                <button
-                  type="button"
-                  onClick={handleWhatsappJoin}
-                  className="w-full sm:w-auto py-3 px-6 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-sm flex items-center justify-center space-x-2 transition-all duration-300 hover:shadow-[0_0_15px_rgba(16,185,129,0.3)] hover:-translate-y-0.5"
-                >
-                  <FaWhatsapp size={20} />
-                  <span>Join Official WhatsApp Group</span>
-                </button>
-
-                {whatsappJoined ? (
-                  <div className="flex items-center space-x-2 text-emerald-400 text-xs font-bold bg-emerald-950/20 border border-emerald-500/20 px-4 py-2.5 rounded-lg w-full sm:w-auto justify-center">
-                    <FaCheckCircle size={16} />
-                    <span>WhatsApp Group Verified</span>
-                  </div>
-                ) : (
-                  <span className="text-amber-400 text-xs font-semibold">
-                    Verification Pending
-                  </span>
-                )}
-              </div>
-            </div>
-
-            {/* Submit Button */}
-            <div className="pt-4">
-              <button
-                type="submit"
-                disabled={submitting || !whatsappJoined || priorities.length === 0}
-                className={`w-full py-4 rounded-xl text-white font-extrabold text-base tracking-wider uppercase transition-all duration-300 ${
-                  whatsappJoined && priorities.length > 0 && !submitting
-                    ? "bg-ieee-blue hover:bg-ieee-light hover:shadow-[0_0_20px_rgba(0,180,255,0.4)] hover:-translate-y-0.5 border border-ieee-accent/25 cursor-pointer"
-                    : "bg-slate-800 text-slate-500 border border-slate-700/50 cursor-not-allowed"
-                }`}
-              >
-                {submitting ? (
-                  <span className="flex items-center justify-center space-x-2">
-                    <FaSpinner className="animate-spin" size={18} />
-                    <span>Submitting Application...</span>
-                  </span>
-                ) : !whatsappJoined ? (
-                  "You must join the WhatsApp Group before submitting"
-                ) : priorities.length === 0 ? (
-                  "Please select your preferred roles"
-                ) : (
-                  "Submit Application"
-                )}
-              </button>
-            </div>
-
-          </form>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+            <Link
+              href="/status"
+              className="w-full sm:w-auto px-8 py-3.5 rounded-xl bg-ieee-blue hover:bg-ieee-light text-white font-extrabold text-xs uppercase tracking-widest transition-all duration-300 hover:shadow-[0_0_20px_rgba(0,180,255,0.4)] hover:-translate-y-0.5 border border-ieee-accent/25"
+            >
+              Check Application Status
+            </Link>
+          </div>
         </div>
 
       </div>
